@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="nav_section">
+        <div class="left_section">
+            <a href="../index.html">Home</a>
+            <a href="../files/tour.html">Tour</a>
+        </div>
+        <div class="info">
+            <h1>Vickayor Private School</h1>
+            <h6>Utilizing your potential to the fullest</h6>
+        </div>
+        <div class="right_section">
+            <a href="/register">Register</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/login">Login</a>
+            <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo">
+        </div>
+    </div>
+    <main class="page-content">
+        <section class="page-header">
+            <h1>Contact Us</h1>
+            <p>Send us a message and our admissions team will respond soon. We are ready to answer questions about enrollment, campus visits, and programs.</p>
+        </section>
+        <section class="contact-section">
+            <div class="form-card">
+                <h2>Send a message</h2>
+                <form id="contact-form">
+                    <label class="label-group" for="name">Full Name
+                        <input type="text" id="name" name="name" placeholder="Your full name" required>
+                    </label>
+                    <label class="label-group" for="email">Email Address
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                    </label>
+                    <label class="label-group" for="subject">Subject
+                        <input type="text" id="subject" name="subject" placeholder="Reason for contacting" required>
+                    </label>
+                    <label class="label-group" for="message">Message
+                        <textarea id="message" name="message" rows="6" placeholder="Write your message here" required></textarea>
+                    </label>
+                    <button class="primary-btn" type="submit">Send Message</button>
+                    <div id="contact-message" class="login-message" style="margin-top:16px"></div>
+                </form>
+            </div>
+            <div class="info-card">
+                <h3>Contact details</h3>
+                <p><strong>Email:</strong> vickayorprivateschool@gmail.com</p>
+                <p><strong>Phone:</strong> +234 706 595 0300</p>
+                <p><strong>Address:</strong> 38H, Olokun Quarters, Fajuyi Road, Ile-Ife</p>
+                <p>Office hours: Monday to Friday, 8:00 AM to 4:00 PM.</p>
+            </div>
+        </section>
+        <script>
+            document.getElementById('contact-form').addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const subject = document.getElementById('subject').value.trim();
+                const message = document.getElementById('message').value.trim();
+                const messageEl = document.getElementById('contact-message');
+
+                if (!name || !email || !subject || !message) {
+                    messageEl.textContent = 'Please fill in all fields before sending your enquiry.';
+                    messageEl.style.color = '#8b0000';
+                    return;
+                }
+
+                try {
+                    await fetch('/contact', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&message=${encodeURIComponent(message)}`
+                    });
+                } catch (error) {
+                    console.warn('Unable to log enquiry to the server:', error);
+                }
+
+                const mailtoLink = `mailto:vickayorprivateschool@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)}`;
+                messageEl.textContent = 'Your enquiry is ready to send. Please use your email client to complete the message.';
+                messageEl.style.color = '#0a6f18';
+                window.location.href = mailtoLink;
+            });
+        </script>
+    </main>
+    <footer class="footer_section">
+        <p>© 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+</body>
+</html>

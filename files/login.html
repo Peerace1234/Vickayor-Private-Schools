@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="nav_section">
+        <div class="left_section">
+            <a href="../index.html">Home</a>
+            <a href="../files/tour.html">Tour</a>
+        </div>
+        <div class="info">
+            <h1>Vickayor Private School</h1>
+            <h6>Utilizing your potential to the fullest</h6>
+        </div>
+        <div class="right_section">
+            <a href="/register">Register</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/teacher-login">Teacher</a>
+            <a href="/login">Login</a>
+            <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo">
+        </div>
+    </div>
+    <main class="page-content">
+        <section class="page-header">
+            <h1>Parent / Student Login</h1>
+            <p>Access your account to view school announcements, payments, schedules, and student progress.</p>
+        </section>
+        <section class="login-section">
+            <div class="auth-card">
+                <h2>Login to your account</h2>
+                <form id="login-form">
+                    <label class="label-group" for="email">Email Address
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                    </label>
+                    <label class="label-group" for="password">Password
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button class="secondary-btn password-toggle" type="button">Show password</button>
+                    </label>
+                    <button class="primary-btn" type="submit">Login</button>
+                </form>
+                <div id="login-message" class="login-message"></div>
+                <div class="auth-actions">
+                    <button class="secondary-btn" type="button" onclick="window.location.href='/register'">Create account</button>
+                    <button class="secondary-btn" type="button" onclick="window.location.href='/contact'">Contact Admissions</button>
+                </div>
+            </div>
+            <script>
+                document.getElementById('login-form').addEventListener('submit', async function (event) {
+                    event.preventDefault();
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                    });
+                    const result = await response.json();
+                    const messageEl = document.getElementById('login-message');
+                    messageEl.textContent = result.message;
+                    messageEl.style.color = response.ok ? '#0a6f18' : '#8b0000';
+                    if (response.ok) {
+                        setTimeout(() => {
+                            window.location.href = '/profile';
+                        }, 900);
+                    }
+                });
+                const toggleButton = document.querySelector('.password-toggle');
+                toggleButton.addEventListener('click', function () {
+                    const passwordInput = document.getElementById('password');
+                    const hidden = passwordInput.type === 'password';
+                    passwordInput.type = hidden ? 'text' : 'password';
+                    toggleButton.textContent = hidden ? 'Hide password' : 'Show password';
+                });
+            </script>
+            <div class="info-card">
+                <h3>Need access?</h3>
+                <p>If you are a new parent or student, please contact our admissions team to set up your account.</p>
+                <p><strong>Email:</strong> vickayorprivateschool@gmail.com</p>
+                <p><strong>Phone:</strong> +234 706 595 0300</p>
+            </div>
+        </section>
+    </main>
+    <footer class="footer_section">
+        <p>© 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+</body>
+</html>

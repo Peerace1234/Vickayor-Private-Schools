@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="nav_section">
+        <div class="left_section">
+            <a href="../index.html">Home</a>
+            <a href="../files/tour.html">Tour</a>
+            <a href="/teacher">Dashboard</a>
+            <a href="/profile">Profile</a>
+        </div>
+        <div class="info">
+            <h1>Teacher Dashboard</h1>
+            <h6>Manage students, attendance, and classroom activities</h6>
+        </div>
+        <div class="right_section">
+            <a href="../files/contact.html">Contact Us</a>
+            <a href="/login">Logout</a>
+            <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo">
+        </div>
+    </div>
+    <main class="page-content">
+        <section class="page-header">
+            <h1>Teacher Dashboard</h1>
+            <p>Use this dashboard to manage student attendance, add or remove students, and keep classroom activities organized.</p>
+        </section>
+        <section class="dashboard-grid">
+            <div class="panel-card">
+                <h2>Student roster</h2>
+                <p>Add and remove students from your class list.</p>
+                <form class="dashboard-form">
+                    <label class="label-group" for="student-name">Student Name
+                        <input type="text" id="student-name" name="student-name" placeholder="Student full name">
+                    </label>
+                    <label class="label-group" for="student-id">Student ID
+                        <input type="text" id="student-id" name="student-id" placeholder="Student ID">
+                    </label>
+                    <div class="button-row">
+                        <button class="primary-btn" type="button">Add Student</button>
+                        <button class="secondary-btn" type="button">Remove Student</button>
+                    </div>
+                </form>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Name</th><th>ID</th><th>Class</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Samuel Aden</td><td>STU001</td><td>Primary 4</td><td><span class="status-pill present">Active</span></td></tr>
+                            <tr><td>Zara Okoro</td><td>STU002</td><td>Primary 4</td><td><span class="status-pill present">Active</span></td></tr>
+                            <tr><td>Faith Emeka</td><td>STU003</td><td>Primary 4</td><td><span class="status-pill absent">Inactive</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel-card">
+                <h2>Attendance</h2>
+                <p>Mark student attendance for today and review attendance summaries.</p>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Student</th><th>Present</th><th>Absent</th><th>Late</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Samuel Aden</td><td><button class="pill-btn">✔</button></td><td><button class="pill-btn">–</button></td><td><button class="pill-btn">–</button></td></tr>
+                            <tr><td>Zara Okoro</td><td><button class="pill-btn">✔</button></td><td><button class="pill-btn">–</button></td><td><button class="pill-btn">–</button></td></tr>
+                            <tr><td>Faith Emeka</td><td><button class="pill-btn">–</button></td><td><button class="pill-btn">✔</button></td><td><button class="pill-btn">–</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="primary-btn" type="button">Save attendance</button>
+            </div>
+            <div class="panel-card">
+                <h2>Classroom activities</h2>
+                <p>Create new activities and keep the class schedule organized.</p>
+                <form class="dashboard-form">
+                    <label class="label-group" for="activity-name">Activity name
+                        <input type="text" id="activity-name" name="activity-name" placeholder="Science project">
+                    </label>
+                    <label class="label-group" for="activity-date">Date
+                        <input type="date" id="activity-date" name="activity-date">
+                    </label>
+                    <button class="primary-btn" type="button">Add activity</button>
+                </form>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Activity</th><th>Date</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Math competition</td><td>2026-05-12</td><td><span class="status-pill present">Planned</span></td></tr>
+                            <tr><td>Reading circle</td><td>2026-05-15</td><td><span class="status-pill present">Scheduled</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel-card">
+                <h2>Parent contact</h2>
+                <p>Send a message to parents or review parent contact details.</p>
+                <form class="dashboard-form">
+                    <label class="label-group" for="parent-name">Parent name
+                        <input type="text" id="parent-name" name="parent-name" placeholder="Parent or guardian name">
+                    </label>
+                    <label class="label-group" for="parent-message">Message
+                        <textarea id="parent-message" name="parent-message" rows="5" placeholder="Message to parent"></textarea>
+                    </label>
+                    <button class="primary-btn" type="button">Send message</button>
+                </form>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Student</th><th>Parent</th><th>Phone</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Samuel Aden</td><td>Mrs. Aden</td><td>+234 800 123 9001</td></tr>
+                            <tr><td>Zara Okoro</td><td>Mr. Okoro</td><td>+234 800 123 9002</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="footer_section">
+        <p>© 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+</body>
+</html>

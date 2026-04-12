@@ -1,0 +1,15 @@
+{
+  "name": "vickayor-school-site",
+  "version": "1.0.0",
+  "description": "Vickayor Private School website with backend login authentication.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "nodemailer": "^8.0.5"
+  }
+}

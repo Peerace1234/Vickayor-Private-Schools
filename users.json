@@ -1,0 +1,23 @@
+{
+  "users": [
+    {
+      "name": "Default Parent",
+      "email": "parent@vickayor.edu",
+      "password": "Vickayor123",
+      "role": "student",
+      "verified": true
+    },
+    {
+      "name": "Teacher Admin",
+      "email": "teacher@vickayor.edu",
+      "password": "Teacher123!",
+      "role": "teacher",
+      "verified": true
+    },
+    {
+      "name": "Test User",
+      "email": "testuser@example.com",
+      "password": "Password123"
+    }
+  ]
+}

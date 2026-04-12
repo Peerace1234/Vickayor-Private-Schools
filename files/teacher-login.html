@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Admin Login | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="nav_section">
+        <div class="left_section">
+            <a href="../index.html">Home</a>
+            <a href="../files/tour.html">Tour</a>
+        </div>
+        <div class="info">
+            <h1>Teacher Admin Login</h1>
+            <h6>Secure teacher access for classroom management</h6>
+        </div>
+        <div class="right_section">
+            <a href="/register">Register</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/login">Student Login</a>
+            <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo">
+        </div>
+    </div>
+    <main class="page-content">
+        <section class="page-header">
+            <h1>Teacher / Admin Login</h1>
+            <p>Use your verified teacher account to manage classes, attendance, and student details.</p>
+        </section>
+        <section class="login-section">
+            <div class="auth-card">
+                <h2>Teacher account access</h2>
+                <form id="teacher-login-form">
+                    <label class="label-group" for="email">Email Address
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                    </label>
+                    <label class="label-group" for="password">Password
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button class="secondary-btn password-toggle" type="button">Show password</button>
+                    </label>
+                    <button class="primary-btn" type="submit">Login as Teacher</button>
+                </form>
+                <div id="teacher-login-message" class="login-message"></div>
+            </div>
+            <div class="info-card">
+                <h3>Need a teacher account?</h3>
+                <p>Teacher accounts are created by administration. Contact the school to request teacher access.</p>
+                <p><strong>Email:</strong> vickayorprivateschool@gmail.com</p>
+                <p><strong>Phone:</strong> +234 706 595 0300</p>
+                <button class="secondary-btn" type="button" onclick="window.location.href='/contact'">Contact school</button>
+            </div>
+        </section>
+    </main>
+    <footer class="footer_section">
+        <p>© 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+    <script>
+        document.getElementById('teacher-login-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const response = await fetch('/teacher-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+            });
+            const result = await response.json();
+            const messageEl = document.getElementById('teacher-login-message');
+            messageEl.textContent = result.message;
+            messageEl.style.color = response.ok ? '#0a6f18' : '#8b0000';
+            if (response.ok) {
+                setTimeout(() => {
+                    window.location.href = '/teacher';
+                }, 900);
+            }
+        });
+
+        const teacherToggle = document.querySelector('.password-toggle');
+        teacherToggle.addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            teacherToggle.textContent = isHidden ? 'Hide password' : 'Show password';
+        });
+    </script>
+</body>
+</html>

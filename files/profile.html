@@ -3,103 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Profile | Vickayor Private School</title>
+    <title>Student Portal | Vickayor Private School</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
     <div class="nav_section">
         <div class="left_section">
-            <a href="../index.html">Home</a>
-            <a href="../files/tour.html">Tour</a>
-            <a href="/teacher">Dashboard</a>
-            <a href="/profile">Profile</a>
+            <a href="/">Home</a>
+            <a href="/tour">Tour</a>
+            <a href="/profile">My Portal</a>
         </div>
         <div class="info">
-            <h1>Teacher Profile</h1>
-            <h6>Assignments, announcements, and parent communication</h6>
+            <div class="brand">
+                <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo" class="brand-logo">
+                <div>
+                    <h1>Vickayor Private School</h1>
+                    <h6>Student Portal</h6>
+                </div>
+            </div>
         </div>
         <div class="right_section">
-            <a href="../files/contact.html">Contact Us</a>
-            <a href="/login">Logout</a>
-            <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo">
+            <a href="/contact">Contact Us</a>
+            <a href="/logout">Logout</a>
         </div>
     </div>
+
     <main class="page-content">
         <section class="page-header">
-            <h1>Teacher Profile</h1>
-            <p>Assign work, mark student submissions, post classroom updates, and communicate with parents from one place.</p>
+            <div class="hero-grid">
+                <div class="header_description">
+                    <h1>Welcome to your Portal</h1>
+                    <p>View your assignments, attendance, results, and school announcements all in one place.</p>
+                </div>
+            </div>
         </section>
+
         <section class="dashboard-grid">
             <div class="panel-card">
-                <h2>Assignments</h2>
-                <p>Assign tasks and mark completed work.</p>
-                <form class="dashboard-form">
-                    <label class="label-group" for="assignment-title">Assignment title
-                        <input type="text" id="assignment-title" name="assignment-title" placeholder="Essay: Our environment">
-                    </label>
-                    <label class="label-group" for="assignment-date">Due date
-                        <input type="date" id="assignment-date" name="assignment-date">
-                    </label>
-                    <label class="label-group" for="assignment-details">Details
-                        <textarea id="assignment-details" name="assignment-details" rows="4" placeholder="Describe the assignment"></textarea>
-                    </label>
-                    <button class="primary-btn" type="button">Assign work</button>
-                </form>
+                <h2>My Assignments</h2>
+                <p>Your current and upcoming assignments.</p>
                 <div class="table-container">
                     <table class="dashboard-table">
                         <thead>
-                            <tr><th>Assignment</th><th>Due</th><th>Status</th></tr>
+                            <tr><th>Assignment</th><th>Due Date</th><th>Status</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Math worksheet</td><td>2026-05-10</td><td><span class="status-pill present">Open</span></td></tr>
-                            <tr><td>Reading journal</td><td>2026-05-14</td><td><span class="status-pill absent">Marked</span></td></tr>
+                            <tr>
+                                <td>Math Worksheet</td>
+                                <td>2026-05-10</td>
+                                <td><span class="status-pill present">Open</span></td>
+                            </tr>
+                            <tr>
+                                <td>Reading Journal</td>
+                                <td>2026-05-14</td>
+                                <td><span class="status-pill absent">Submitted</span></td>
+                            </tr>
+                            <tr>
+                                <td>Science Project</td>
+                                <td>2026-05-20</td>
+                                <td><span class="status-pill">Pending</span></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
             <div class="panel-card">
-                <h2>Mark assignments</h2>
-                <p>Track submissions and assign marks.</p>
+                <h2>My Attendance</h2>
+                <p>Your attendance record for this term.</p>
                 <div class="table-container">
                     <table class="dashboard-table">
                         <thead>
-                            <tr><th>Student</th><th>Assignment</th><th>Status</th><th>Action</th></tr>
+                            <tr><th>Date</th><th>Status</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Samuel Aden</td><td>Math worksheet</td><td><span class="status-pill present">Submitted</span></td><td><button class="primary-btn" type="button">Mark</button></td></tr>
-                            <tr><td>Zara Okoro</td><td>Reading journal</td><td><span class="status-pill absent">Graded</span></td><td><button class="secondary-btn" type="button">View</button></td></tr>
+                            <tr>
+                                <td>2026-05-01</td>
+                                <td><span class="status-pill present">Present</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-05-02</td>
+                                <td><span class="status-pill present">Present</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-05-05</td>
+                                <td><span class="status-pill absent">Absent</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-05-06</td>
+                                <td><span class="status-pill present">Present</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-05-07</td>
+                                <td><span class="status-pill present">Present</span></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
             <div class="panel-card">
-                <h2>Post information</h2>
-                <p>Share announcements and classroom updates.</p>
-                <form class="dashboard-form">
-                    <label class="label-group" for="announcement">Announcement
-                        <textarea id="announcement" name="announcement" rows="5" placeholder="Write your update here"></textarea>
-                    </label>
-                    <button class="primary-btn" type="button">Post announcement</button>
-                </form>
+                <h2>My Results</h2>
+                <p>Your grades for completed subjects this term.</p>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Subject</th><th>Score</th><th>Grade</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mathematics</td>
+                                <td>85/100</td>
+                                <td><span class="status-pill present">A</span></td>
+                            </tr>
+                            <tr>
+                                <td>English</td>
+                                <td>78/100</td>
+                                <td><span class="status-pill present">B</span></td>
+                            </tr>
+                            <tr>
+                                <td>Science</td>
+                                <td>92/100</td>
+                                <td><span class="status-pill present">A+</span></td>
+                            </tr>
+                            <tr>
+                                <td>Social Studies</td>
+                                <td>70/100</td>
+                                <td><span class="status-pill">B-</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
             <div class="panel-card">
-                <h2>Contact parents</h2>
-                <p>Send a message directly to a student's parent or guardian.</p>
-                <form class="dashboard-form">
-                    <label class="label-group" for="parent-student">Student name
-                        <input type="text" id="parent-student" name="parent-student" placeholder="Student full name">
-                    </label>
-                    <label class="label-group" for="parent-email">Parent email
-                        <input type="email" id="parent-email" name="parent-email" placeholder="parent@example.com">
-                    </label>
-                    <label class="label-group" for="parent-note">Message
-                        <textarea id="parent-note" name="parent-note" rows="5" placeholder="Write your message"></textarea>
-                    </label>
-                    <button class="primary-btn" type="button">Send to parent</button>
-                </form>
+                <h2>Announcements</h2>
+                <p>Latest updates from your teachers and school.</p>
+                <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="background:#fff8e1; padding:14px; border-radius:14px; border-left:4px solid darkgoldenrod;">
+                        <strong>Term Exam Schedule</strong>
+                        <p style="margin:6px 0 0; font-size:0.9rem; color:darkgoldenrod;">End of term exams begin May 25th. Please prepare early and review all topics.</p>
+                    </div>
+                    <div style="background:#fff8e1; padding:14px; border-radius:14px; border-left:4px solid darkgoldenrod;">
+                        <strong>Sports Day — May 18th</strong>
+                        <p style="margin:6px 0 0; font-size:0.9rem; color:darkgoldenrod;">Annual sports day is scheduled for May 18th. All students must participate.</p>
+                    </div>
+                    <div style="background:#fff8e1; padding:14px; border-radius:14px; border-left:4px solid darkgoldenrod;">
+                        <strong>Library Hours Extended</strong>
+                        <p style="margin:6px 0 0; font-size:0.9rem; color:darkgoldenrod;">The school library is now open until 5:00 PM on weekdays during exam season.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <h2>School Fees</h2>
+                <p>Your payment status for this term.</p>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Term</th><th>Amount</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>First Term 2026</td>
+                                <td>₦45,000</td>
+                                <td><span class="status-pill present">Paid</span></td>
+                            </tr>
+                            <tr>
+                                <td>Second Term 2026</td>
+                                <td>₦45,000</td>
+                                <td><span class="status-pill absent">Pending</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="primary-btn" style="margin-top:16px;" onclick="window.location.href='/contact'">Contact Bursar</button>
+            </div>
+
+            <div class="panel-card">
+                <h2>My Timetable</h2>
+                <p>Your weekly class schedule.</p>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Day</th><th>Subject</th><th>Time</th><th>Teacher</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Monday</td><td>Mathematics</td><td>8:00 AM</td><td>Mr. Adeyemi</td></tr>
+                            <tr><td>Monday</td><td>English</td><td>10:00 AM</td><td>Mrs. Okafor</td></tr>
+                            <tr><td>Tuesday</td><td>Science</td><td>8:00 AM</td><td>Mr. Bello</td></tr>
+                            <tr><td>Wednesday</td><td>Social Studies</td><td>9:00 AM</td><td>Mrs. Eze</td></tr>
+                            <tr><td>Thursday</td><td>Mathematics</td><td>8:00 AM</td><td>Mr. Adeyemi</td></tr>
+                            <tr><td>Friday</td><td>English</td><td>8:00 AM</td><td>Mrs. Okafor</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>
+
     <footer class="footer_section">
         <p>© 2026 Vickayor Private School. All rights reserved.</p>
     </footer>

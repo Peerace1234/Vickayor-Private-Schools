@@ -9,13 +9,18 @@
 <body>
     <div class="nav_section">
         <div class="left_section">
-            <a href="../index.html">Home</a>
-            <a href="../files/tour.html">Tour</a>
+            <a href="/">Home</a>
+            <a href="/tour">Tour</a>
         </div>
         <div class="info">
+    <div class="brand">
+        <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo" class="brand-logo">
+        <div>
             <h1>Vickayor Private School</h1>
             <h6>Utilizing your potential to the fullest</h6>
         </div>
+    </div>
+</div>
         <div class="right_section">
             <a href="/register">Register</a>
             <a href="/contact">Contact Us</a>
@@ -72,20 +77,24 @@
                 }
 
                 try {
-                    await fetch('/contact', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&message=${encodeURIComponent(message)}`
-                    });
-                } catch (error) {
-                    console.warn('Unable to log enquiry to the server:', error);
-                }
-
-                const mailtoLink = `mailto:vickayorprivateschool@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)}`;
-                messageEl.textContent = 'Your enquiry is ready to send. Please use your email client to complete the message.';
-                messageEl.style.color = '#0a6f18';
-                window.location.href = mailtoLink;
-            });
+    const response = await fetch('/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&message=${encodeURIComponent(message)}`
+    });
+    const result = await response.json();
+    if (result.success) {
+        messageEl.textContent = 'Your message has been sent successfully! We will get back to you soon.';
+        messageEl.style.color = '#0a6f18';
+        document.getElementById('contact-form').reset();
+    } else {
+        messageEl.textContent = 'Something went wrong. Please try again.';
+        messageEl.style.color = '#8b0000';
+    }
+} catch (error) {
+    messageEl.textContent = 'Unable to send message. Please try again.';
+    messageEl.style.color = '#8b0000';
+}       });
         </script>
     </main>
     <footer class="footer_section">

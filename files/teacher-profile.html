@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Profile | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="nav_section">
+        <div class="left_section">
+            <a href="/">Home</a>
+            <a href="/tour">Tour</a>
+            <a href="/teacher">Dashboard</a>
+            <a href="/profile">Profile</a>
+        </div>
+        <div class="info">
+            <h1>Teacher Profile</h1>
+            <h6>Assignments, announcements, and parent communication</h6>
+        </div>
+        <div class="right_section">
+            <a href="/contact">Contact Us</a>
+            <a href="/logout">Logout</a>
+            <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo">
+        </div>
+    </div>
+    <main class="page-content">
+        <section class="page-header">
+            <h1>Teacher Profile</h1>
+            <p>Assign work, mark student submissions, post classroom updates, and communicate with parents from one place.</p>
+        </section>
+        <section class="dashboard-grid">
+            <div class="panel-card">
+                <h2>Assignments</h2>
+                <p>Assign tasks and mark completed work.</p>
+                <form class="dashboard-form">
+                    <label class="label-group" for="assignment-title">Assignment title
+                        <input type="text" id="assignment-title" name="assignment-title" placeholder="Essay: Our environment">
+                    </label>
+                    <label class="label-group" for="assignment-date">Due date
+                        <input type="date" id="assignment-date" name="assignment-date">
+                    </label>
+                    <label class="label-group" for="assignment-details">Details
+                        <textarea id="assignment-details" name="assignment-details" rows="4" placeholder="Describe the assignment"></textarea>
+                    </label>
+                    <button class="primary-btn" type="button">Assign work</button>
+                </form>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Assignment</th><th>Due</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Math worksheet</td><td>2026-05-10</td><td><span class="status-pill present">Open</span></td></tr>
+                            <tr><td>Reading journal</td><td>2026-05-14</td><td><span class="status-pill absent">Marked</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel-card">
+                <h2>Mark assignments</h2>
+                <p>Track submissions and assign marks.</p>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr><th>Student</th><th>Assignment</th><th>Status</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Samuel Aden</td><td>Math worksheet</td><td><span class="status-pill present">Submitted</span></td><td><button class="primary-btn" type="button">Mark</button></td></tr>
+                            <tr><td>Zara Okoro</td><td>Reading journal</td><td><span class="status-pill absent">Graded</span></td><td><button class="secondary-btn" type="button">View</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel-card">
+                <h2>Post information</h2>
+                <p>Share announcements and classroom updates.</p>
+                <form class="dashboard-form">
+                    <label class="label-group" for="announcement">Announcement
+                        <textarea id="announcement" name="announcement" rows="5" placeholder="Write your update here"></textarea>
+                    </label>
+                    <button class="primary-btn" type="button">Post announcement</button>
+                </form>
+            </div>
+            <div class="panel-card">
+                <h2>Contact parents</h2>
+                <p>Send a message directly to a student's parent or guardian.</p>
+                <form class="dashboard-form">
+                    <label class="label-group" for="parent-student">Student name
+                        <input type="text" id="parent-student" name="parent-student" placeholder="Student full name">
+                    </label>
+                    <label class="label-group" for="parent-email">Parent email
+                        <input type="email" id="parent-email" name="parent-email" placeholder="parent@example.com">
+                    </label>
+                    <label class="label-group" for="parent-note">Message
+                        <textarea id="parent-note" name="parent-note" rows="5" placeholder="Write your message"></textarea>
+                    </label>
+                    <button class="primary-btn" type="button">Send to parent</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    <footer class="footer_section">
+        <p>© 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+</body>
+</html>

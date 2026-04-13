@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="nav_section">
+        <div class="left_section">
+            <a href="/">Home</a>
+        </div>
+        <div class="info">
+            <div class="brand">
+                <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo" class="brand-logo">
+                <div>
+                    <h1>Admin Panel</h1>
+                    <h6>Manage teacher applications</h6>
+                </div>
+            </div>
+        </div>
+        <div class="right_section">
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <main class="page-content">
+        <section style="margin-top:32px;">
+            <div class="panel-card">
+                <h2>Pending Teacher Applications</h2>
+                <p>Review and approve or reject teacher account requests below.</p>
+                <div id="message" style="display:none; padding:12px; border-radius:12px; margin:16px 0; font-weight:600;"></div>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Subject</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applications-list">
+                            <tr><td colspan="6" style="text-align:center; padding:24px;">Loading applications...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel-card" style="margin-top:24px;">
+                <h2>All Teachers</h2>
+                <p>Currently approved teacher accounts.</p>
+                <div class="table-container">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Subject</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachers-list">
+                            <tr><td colspan="4" style="text-align:center; padding:24px;">Loading teachers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer_section">
+        <p>© 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Load all data on page open
+        loadApplications();
+        loadTeachers();
+
+        async function loadApplications() {
+            try {
+                const res = await fetch('/admin/applications');
+                const data = await res.json();
+                const tbody = document.getElementById('applications-list');
+
+                if (!data.applications || data.applications.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px;">No pending applications.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.applications.map(app => `
+                    <tr id="row-${app.email.replace('@','_').replace('.','_')}">
+                        <td>${app.name}</td>
+                        <td>${app.email}</td>
+                        <td>${app.subject || '—'}</td>
+                        <td>${app.phone || '—'}</td>
+                        <td><span class="status-pill">${app.status}</span></td>
+                        <td>
+                            <div style="display:flex; gap:8px;">
+                                <button class="primary-btn" style="padding:8px 16px; font-size:0.85rem;" onclick="approveTeacher('${app.email}')">Approve</button>
+                                <button class="secondary-btn" style="padding:8px 16px; font-size:0.85rem; margin-top:0;" onclick="rejectTeacher('${app.email}')">Reject</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(err) {
+                document.getElementById('applications-list').innerHTML = '<tr><td colspan="6">Error loading applications.</td></tr>';
+            }
+        }
+
+        async function loadTeachers() {
+            try {
+                const res = await fetch('/admin/teachers');
+                const data = await res.json();
+                const tbody = document.getElementById('teachers-list');
+
+                if (!data.teachers || data.teachers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:24px;">No approved teachers yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.teachers.map(t => `
+                    <tr>
+                        <td>${t.name}</td>
+                        <td>${t.email}</td>
+                        <td>${t.subject || '—'}</td>
+                        <td>
+                            <button class="secondary-btn" style="padding:8px 16px; font-size:0.85rem; margin-top:0; background:#ffd7d7; color:#8b0000; border-color:#8b0000;" onclick="removeTeacher('${t.email}')">Remove</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(err) {
+                document.getElementById('teachers-list').innerHTML = '<tr><td colspan="4">Error loading teachers.</td></tr>';
+            }
+        }
+
+        async function approveTeacher(email) {
+            try {
+                const res = await fetch('/admin/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `email=${encodeURIComponent(email)}`
+                });
+                const result = await res.json();
+                showMessage(result.message, result.success);
+                if (result.success) {
+                    loadApplications();
+                    loadTeachers();
+                }
+            } catch(err) {
+                showMessage('Error approving teacher.', false);
+            }
+        }
+
+        async function rejectTeacher(email) {
+            if (!confirm(`Are you sure you want to reject ${email}?`)) return;
+            try {
+                const res = await fetch('/admin/reject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `email=${encodeURIComponent(email)}`
+                });
+                const result = await res.json();
+                showMessage(result.message, result.success);
+                if (result.success) loadApplications();
+            } catch(err) {
+                showMessage('Error rejecting application.', false);
+            }
+        }
+
+        async function removeTeacher(email) {
+            if (!confirm(`Remove teacher account for ${email}?`)) return;
+            try {
+                const res = await fetch('/admin/remove-teacher', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `email=${encodeURIComponent(email)}`
+                });
+                const result = await res.json();
+                showMessage(result.message, result.success);
+                if (result.success) loadTeachers();
+            } catch(err) {
+                showMessage('Error removing teacher.', false);
+            }
+        }
+
+        function showMessage(msg, success) {
+            const box = document.getElementById('message');
+            box.textContent = msg;
+            box.style.display = 'block';
+            box.style.background = success ? '#dafcd6' : '#ffd7d7';
+            box.style.color = success ? 'green' : 'red';
+            setTimeout(() => box.style.display = 'none', 4000);
+        }
+    </script>
+</body>
+</html>

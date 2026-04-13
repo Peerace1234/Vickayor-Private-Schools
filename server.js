@@ -1,3 +1,4 @@
+require("dotenv").config();
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -17,23 +18,39 @@ const contentTypes = {
 };
 
 const sessions = {};
+const loginAttempts = {};
 
+// ─── RATE LIMITING ────────────────────────────────────────────────────────────
+function isRateLimited(ip) {
+  const now = Date.now();
+  if (!loginAttempts[ip]) {
+    loginAttempts[ip] = { count: 1, firstAttempt: now };
+    return false;
+  }
+  if (now - loginAttempts[ip].firstAttempt > 15 * 60 * 1000) {
+    loginAttempts[ip] = { count: 1, firstAttempt: now };
+    return false;
+  }
+  loginAttempts[ip].count++;
+  return loginAttempts[ip].count > 5;
+}
+
+// ─── STATIC FILE SERVING ─────────────────────────────────────────────────────
 function serveStatic(filePath, response) {
   const ext = path.extname(filePath);
   const type = contentTypes[ext.toLowerCase()] || "application/octet-stream";
-
   fs.readFile(filePath, function (error, content) {
     if (error) {
       response.writeHead(404, { "Content-Type": "text/plain" });
       response.end("404 Not Found");
       return;
     }
-
     response.writeHead(200, { "Content-Type": type });
     response.end(content);
   });
 }
 
+// ─── BODY PARSER ─────────────────────────────────────────────────────────────
 function parseBody(request, callback) {
   let body = "";
   request.on("data", (chunk) => {
@@ -44,6 +61,7 @@ function parseBody(request, callback) {
   });
 }
 
+// ─── COOKIES & SESSIONS ──────────────────────────────────────────────────────
 function parseCookies(request) {
   const header = request.headers.cookie || "";
   return header.split(";").reduce((cookies, cookiePair) => {
@@ -71,6 +89,7 @@ function getSession(request) {
   return session;
 }
 
+// ─── PASSWORD HASHING ────────────────────────────────────────────────────────
 function generateSalt() {
   return crypto.randomBytes(16).toString("hex");
 }
@@ -83,14 +102,8 @@ function hashPassword(password, salt) {
 }
 
 function verifyPassword(password, storedPassword) {
-  if (!storedPassword) {
-    return false;
-  }
-
-  if (storedPassword.indexOf(":") === -1) {
-    return password === storedPassword;
-  }
-
+  if (!storedPassword) return false;
+  if (storedPassword.indexOf(":") === -1) return password === storedPassword;
   const [salt, originalHash] = storedPassword.split(":");
   const hash = crypto
     .pbkdf2Sync(password, salt, 100000, 64, "sha512")
@@ -105,85 +118,12 @@ function verifyPassword(password, storedPassword) {
   }
 }
 
+// ─── USERS FILE ──────────────────────────────────────────────────────────────
 function readUsersFile() {
   const filePath = path.join(__dirname, "users.json");
-  if (!fs.existsSync(filePath)) {
-    return { users: [] };
-  }
-
+  if (!fs.existsSync(filePath)) return { users: [] };
   const raw = fs.readFileSync(filePath, "utf8");
   return JSON.parse(raw || '{"users": []}');
-}
-
-function createEmailTransporter() {
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = process.env.SMTP_PORT
-    ? parseInt(process.env.SMTP_PORT, 10)
-    : 587;
-  const smtpService = process.env.SMTP_SERVICE;
-
-  if (!smtpUser || !smtpPass) {
-    return null;
-  }
-
-  let nodemailer;
-  try {
-    nodemailer = require("nodemailer");
-  } catch (error) {
-    console.warn(
-      "Nodemailer is not installed. Email verification will be disabled.",
-    );
-    return null;
-  }
-
-  const transportConfig = {
-    auth: { user: smtpUser, pass: smtpPass },
-  };
-
-  if (smtpHost) {
-    transportConfig.host = smtpHost;
-    transportConfig.port = smtpPort;
-    transportConfig.secure = smtpPort === 465;
-  } else if (smtpService) {
-    transportConfig.service = smtpService;
-  }
-
-  return nodemailer.createTransport(transportConfig);
-}
-
-function sendVerificationEmail(to, token, name) {
-  const transporter = createEmailTransporter();
-  const verifyUrl = `http://localhost:8080/verify?token=${token}`;
-  const mailOptions = {
-    from:
-      process.env.EMAIL_FROM ||
-      process.env.SMTP_USER ||
-      "no-reply@vickayorprivateschool.com",
-    to,
-    subject: "Verify your Vickayor Private School account",
-    text: `Hello ${name || "User"},\n\nThank you for registering. Please verify your account by visiting the link below:\n\n${verifyUrl}\n\nIf you did not request this email, ignore it.`,
-  };
-
-  if (!transporter) {
-    console.log(
-      "Email verification not configured. Verification link:",
-      verifyUrl,
-    );
-    return Promise.resolve(false);
-  }
-
-  return transporter
-    .sendMail(mailOptions)
-    .then((info) => {
-      console.log("Verification email sent:", info.response || info.messageId);
-      return true;
-    })
-    .catch((error) => {
-      console.error("Unable to send verification email:", error);
-      return false;
-    });
 }
 
 function saveUsersFile(data) {
@@ -198,30 +138,164 @@ function findUserByEmail(email) {
   );
 }
 
+// ─── EMAIL ───────────────────────────────────────────────────────────────────
+function createEmailTransporter() {
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT
+    ? parseInt(process.env.SMTP_PORT, 10)
+    : 587;
+  const smtpService = process.env.SMTP_SERVICE;
+  if (!smtpUser || !smtpPass) return null;
+  let nodemailer;
+  try {
+    nodemailer = require("nodemailer");
+  } catch (e) {
+    return null;
+  }
+  const config = { auth: { user: smtpUser, pass: smtpPass } };
+  if (smtpHost) {
+    config.host = smtpHost;
+    config.port = smtpPort;
+    config.secure = smtpPort === 465;
+  } else if (smtpService) {
+    config.service = smtpService;
+  }
+  return nodemailer.createTransport(config);
+}
+
+// Welcome email — sent when student registers
+function sendWelcomeEmail(to, name) {
+  const transporter = createEmailTransporter();
+  if (!transporter) {
+    console.log("Email not configured. Cannot send welcome email.");
+    return Promise.resolve(false);
+  }
+  return transporter
+    .sendMail({
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      to,
+      subject: "Welcome to Vickayor Private School!",
+      text: `Hello ${name},\n\nWelcome to Vickayor Private School! Your student account has been created successfully.\n\nYou can log in at any time here:\nhttp://localhost:8080/login\n\nIf you have any questions, contact us at:\nEmail: vickayorprivateschool@gmail.com\nPhone: +234 706 595 0300\n\nWarm regards,\nVickayor Private School`,
+    })
+    .then(() => {
+      console.log("Welcome email sent to:", to);
+      return true;
+    })
+    .catch((error) => {
+      console.error("Failed to send welcome email:", error);
+      return false;
+    });
+}
+
+// Approval email — sent when admin approves a teacher
+function sendApprovalEmail(to, name) {
+  const transporter = createEmailTransporter();
+  if (!transporter) {
+    console.log("Email not configured. Cannot send approval email.");
+    return Promise.resolve(false);
+  }
+  return transporter
+    .sendMail({
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      to,
+      subject:
+        "Your Vickayor Private School Teacher Account Has Been Approved!",
+      text: `Hello ${name},\n\nGreat news! Your teacher account at Vickayor Private School has been approved by the admin.\n\nYou can now log in using your email and password at:\nhttp://localhost:8080/teacher-login\n\nWelcome to the Vickayor team! We are excited to have you on board.\n\nIf you have any questions, contact us at:\nEmail: vickayorprivateschool@gmail.com\nPhone: +234 706 595 0300\n\nWarm regards,\nVickayor Private School`,
+    })
+    .then(() => {
+      console.log("Approval email sent to:", to);
+      return true;
+    })
+    .catch((error) => {
+      console.error("Failed to send approval email:", error);
+      return false;
+    });
+}
+
+// Rejection email — sent when admin rejects a teacher application
+function sendRejectionEmail(to, name) {
+  const transporter = createEmailTransporter();
+  if (!transporter) {
+    console.log("Email not configured. Cannot send rejection email.");
+    return Promise.resolve(false);
+  }
+  return transporter
+    .sendMail({
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      to,
+      subject: "Update on Your Vickayor Private School Teacher Application",
+      text: `Hello ${name},\n\nThank you for applying to be a teacher at Vickayor Private School.\n\nUnfortunately, your application has not been approved at this time. Please contact the school directly for more information.\n\nEmail: vickayorprivateschool@gmail.com\nPhone: +234 706 595 0300\n\nKind regards,\nVickayor Private School`,
+    })
+    .then(() => {
+      console.log("Rejection email sent to:", to);
+      return true;
+    })
+    .catch((error) => {
+      console.error("Failed to send rejection email:", error);
+      return false;
+    });
+}
+
+// Verification email — sent for email verification if enabled
+function sendVerificationEmail(to, token, name) {
+  const transporter = createEmailTransporter();
+  const verifyUrl = `http://localhost:8080/verify?token=${token}`;
+  if (!transporter) {
+    console.log("Email not configured. Verification link:", verifyUrl);
+    return Promise.resolve(false);
+  }
+  return transporter
+    .sendMail({
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      to,
+      subject: "Verify your Vickayor Private School account",
+      text: `Hello ${name || "User"},\n\nThank you for registering. Please verify your account by clicking the link below:\n\n${verifyUrl}\n\nIgnore this email if you did not register.\n\nVickayor Private School`,
+    })
+    .then(() => true)
+    .catch(() => false);
+}
+function sendContactEmail(enquiry) {
+  const transporter = createEmailTransporter();
+  if (!transporter) {
+    console.log("Email not configured. Contact enquiry saved locally only.");
+    return Promise.resolve(false);
+  }
+  return transporter
+    .sendMail({
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      to: process.env.SMTP_USER,
+      replyTo: enquiry.email,
+      subject: `New Enquiry from ${enquiry.name}: ${enquiry.subject}`,
+      text: `You have a new enquiry from your school website.\n\nName: ${enquiry.name}\nEmail: ${enquiry.email}\nSubject: ${enquiry.subject}\n\nMessage:\n${enquiry.message}\n\nSent: ${enquiry.date}`,
+    })
+    .then(() => {
+      console.log("Contact email sent to school.");
+      return true;
+    })
+    .catch((error) => {
+      console.error("Failed to send contact email:", error);
+      return false;
+    });
+}
+
+// ─── AUTH FUNCTIONS ──────────────────────────────────────────────────────────
 function authenticateLogin(data, role) {
   const email = (data.email || "").trim();
   const password = data.password || "";
   const user = findUserByEmail(email);
-
-  if (!user) {
+  if (!user) return { success: false, message: "Invalid email or password." };
+  if (role && user.role !== role)
+    return { success: false, message: "Invalid credentials." };
+  if (!verifyPassword(password, user.password))
     return { success: false, message: "Invalid email or password." };
-  }
-
-  if (role && user.role !== role) {
-    return { success: false, message: "Invalid teacher credentials." };
-  }
-
-  if (!verifyPassword(password, user.password)) {
-    return { success: false, message: "Invalid email or password." };
-  }
-
-  if (!user.verified) {
+  if (!user.verified)
     return {
       success: false,
-      message: "Please verify your email before logging in.",
+      message:
+        "Your account is pending approval. Please wait for admin confirmation.",
     };
-  }
-
   return { success: true, message: "Login successful.", user };
 }
 
@@ -229,47 +303,57 @@ function registerUser(data) {
   const name = (data.name || "").trim();
   const email = (data.email || "").trim().toLowerCase();
   const password = data.password || "";
-
-  if (!name || !email || !password) {
+  if (!name || !email || !password)
     return {
       success: false,
       message: "Name, email, and password are required.",
     };
-  }
-
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email))
+    return { success: false, message: "Please enter a valid email address." };
+  if (password.length < 8)
+    return {
+      success: false,
+      message: "Password must be at least 8 characters.",
+    };
+  if (!/[A-Z]/.test(password))
+    return {
+      success: false,
+      message: "Password must contain at least one uppercase letter.",
+    };
+  if (!/[0-9]/.test(password))
+    return {
+      success: false,
+      message: "Password must contain at least one number.",
+    };
   try {
     const usersFile = readUsersFile();
     const users = usersFile.users || [];
-    if (users.some((user) => user.email === email)) {
+    if (users.some((u) => u.email === email))
       return {
         success: false,
         message: "An account already exists with this email.",
       };
-    }
-
     const salt = generateSalt();
-    const passwordHash = hashPassword(password, salt);
-    const verificationToken = crypto.randomBytes(20).toString("hex");
-
     users.push({
       name,
       email,
-      password: passwordHash,
+      password: hashPassword(password, salt),
       role: "student",
-      verified: false,
-      verificationToken,
+      verified: true,
+      status: "approved",
     });
-
     saveUsersFile({ users });
-    sendVerificationEmail(email, verificationToken, name).catch(() => null);
+
+    // Send welcome email
+    sendWelcomeEmail(email, name).catch(() => null);
 
     return {
       success: true,
       message:
-        "Account created successfully. Please check your email to verify your account.",
+        "Account created successfully. Welcome to Vickayor Private School!",
     };
   } catch (error) {
-    console.error("Error saving users.json", error);
     return {
       success: false,
       message: "Unable to create account. Please try again.",
@@ -277,27 +361,116 @@ function registerUser(data) {
   }
 }
 
-function verifyAccountWithToken(token) {
-  if (!token) {
-    return { success: false, message: "Verification token missing." };
-  }
+function registerTeacherApplication(data) {
+  const name = (data.name || "").trim();
+  const email = (data.email || "").trim().toLowerCase();
+  const password = data.password || "";
+  const subject = (data.subject || "").trim();
+  const phone = (data.phone || "").trim();
+  if (!name || !email || !password)
+    return {
+      success: false,
+      message: "Name, email, and password are required.",
+    };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email))
+    return { success: false, message: "Please enter a valid email address." };
+  if (password.length < 8)
+    return {
+      success: false,
+      message: "Password must be at least 8 characters.",
+    };
+  if (!/[A-Z]/.test(password))
+    return {
+      success: false,
+      message: "Password must contain at least one uppercase letter.",
+    };
+  if (!/[0-9]/.test(password))
+    return {
+      success: false,
+      message: "Password must contain at least one number.",
+    };
+  const usersFile = readUsersFile();
+  const users = usersFile.users || [];
+  if (users.some((u) => u.email === email))
+    return {
+      success: false,
+      message: "An account already exists with this email.",
+    };
+  const salt = generateSalt();
+  users.push({
+    name,
+    email,
+    password: hashPassword(password, salt),
+    role: "teacher",
+    verified: false,
+    status: "pending",
+    subject,
+    phone,
+  });
+  saveUsersFile({ users });
+  return {
+    success: true,
+    message:
+      "Application submitted! The admin will review and approve your account.",
+  };
+}
 
+function approveTeacher(email) {
+  if (!email) return { success: false, message: "Email required." };
+  const usersFile = readUsersFile();
+  const users = usersFile.users || [];
+  const user = users.find((u) => u.email === email.trim().toLowerCase());
+  if (!user) return { success: false, message: "User not found." };
+  user.verified = true;
+  user.status = "approved";
+  user.role = "teacher";
+  saveUsersFile({ users });
+
+  // Send approval email to teacher
+  sendApprovalEmail(user.email, user.name).catch(() => null);
+
+  return {
+    success: true,
+    message: `${user.name} has been approved as a teacher.`,
+  };
+}
+
+function rejectTeacherApplication(email) {
+  if (!email) return { success: false, message: "Email required." };
+  const usersFile = readUsersFile();
+  const users = usersFile.users || [];
+  const user = users.find((u) => u.email === email.trim().toLowerCase());
+
+  // Send rejection email before removing
+  if (user) sendRejectionEmail(user.email, user.name).catch(() => null);
+
+  usersFile.users = (usersFile.users || []).filter(
+    (u) => u.email !== email.trim().toLowerCase(),
+  );
+  saveUsersFile(usersFile);
+  return {
+    success: true,
+    message: "Application rejected and applicant notified.",
+  };
+}
+
+function verifyAccountWithToken(token) {
+  if (!token) return { success: false, message: "Verification token missing." };
   try {
     const usersFile = readUsersFile();
     const users = usersFile.users || [];
     const user = users.find((item) => item.verificationToken === token);
-
-    if (!user) {
-      return { success: false, message: "Invalid or expired verification token." };
-    }
-
+    if (!user)
+      return {
+        success: false,
+        message: "Invalid or expired verification token.",
+      };
     user.verified = true;
     user.verificationToken = null;
     saveUsersFile({ users });
-
     return { success: true, message: "Your account has been verified." };
   } catch (error) {
-    console.error("Error verifying account", error);
     return {
       success: false,
       message: "Unable to verify account. Please try again later.",
@@ -305,75 +478,146 @@ function verifyAccountWithToken(token) {
   }
 }
 
+// ─── SERVER ───────────────────────────────────────────────────────────────────
 const server = http.createServer((request, response) => {
   const parsedUrl = url.parse(request.url, true);
   let pathname = decodeURIComponent(parsedUrl.pathname || "");
   pathname = pathname.replace(/\/+$|^\s+|\s+$/g, "") || "/";
 
-  if (pathname === "/") {
-    pathname = "/index.html";
-  }
-
+  // ── GET REQUESTS ────────────────────────────────────────────────────────────
   if (request.method === "GET") {
-    if (pathname === "/register") {
-      pathname = "/files/register.html";
-    }
-    if (pathname === "/login") {
-      pathname = "/files/login.html";
-    }
-    if (pathname === "/teacher-login") {
-      pathname = "/files/teacher-login.html";
-    }
-    if (pathname === "/contact") {
-      pathname = "/files/contact.html";
-    }
-    if (pathname === "/tour") {
-      pathname = "/files/tour.html";
-    }
-    if (pathname === "/teacher") {
-      pathname = "/files/teacher.html";
-    }
-    if (pathname === "/profile") {
-      pathname = "/files/profile.html";
+    // Home
+    if (pathname === "/") {
+      return serveStatic(path.join(__dirname, "index.html"), response);
     }
 
+    // Logout
+    if (pathname === "/logout") {
+      const cookies = parseCookies(request);
+      const sessionId = cookies.sessionId;
+      if (sessionId) delete sessions[sessionId];
+      response.writeHead(302, {
+        Location: "/login",
+        "Set-Cookie": "sessionId=; HttpOnly; Path=/; Max-Age=0",
+      });
+      response.end();
+      return;
+    }
+
+    // Email verification
     if (pathname === "/verify") {
       const result = verifyAccountWithToken(parsedUrl.query.token);
       response.writeHead(200, { "Content-Type": "text/html" });
       response.end(
-        `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Account Verification</title></head><body style="font-family:Arial,sans-serif;padding:32px;"><h1>${result.success ? "Verified" : "Verification Failed"}</h1><p>${result.message}</p><p><a href="/login">Go to login</a></p></body></html>`,
+        `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Verification</title></head><body style="font-family:Arial,sans-serif;padding:32px;"><h1>${result.success ? "✅ Verified!" : "❌ Failed"}</h1><p>${result.message}</p><a href="/login">Go to login</a></body></html>`,
       );
       return;
     }
 
+    // Admin panel
+    if (pathname === "/admin") {
+      const session = getSession(request);
+      if (!session || session.role !== "admin") {
+        response.writeHead(302, { Location: "/login" });
+        response.end();
+        return;
+      }
+      return serveStatic(path.join(__dirname, "files/admin.html"), response);
+    }
+
+    // Admin API — pending applications
+    if (pathname === "/admin/applications") {
+      const session = getSession(request);
+      if (!session || session.role !== "admin") {
+        response.writeHead(403, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({ error: "Access denied." }));
+        return;
+      }
+      const usersFile = readUsersFile();
+      const applications = (usersFile.users || []).filter(
+        (u) => u.status === "pending",
+      );
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ applications }));
+      return;
+    }
+
+    // Admin API — approved teachers
+    if (pathname === "/admin/teachers") {
+      const session = getSession(request);
+      if (!session || session.role !== "admin") {
+        response.writeHead(403, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({ error: "Access denied." }));
+        return;
+      }
+      const usersFile = readUsersFile();
+      const teachers = (usersFile.users || []).filter(
+        (u) => u.role === "teacher" && u.verified,
+      );
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ teachers }));
+      return;
+    }
+
+    // Teacher dashboard
     if (pathname === "/teacher") {
       const session = getSession(request);
       if (!session || session.role !== "teacher") {
-        response.writeHead(403, { "Content-Type": "text/plain" });
-        response.end("Access denied. Teacher login required.");
+        response.writeHead(302, { Location: "/teacher-login" });
+        response.end();
         return;
       }
+      return serveStatic(path.join(__dirname, "files/teacher.html"), response);
     }
 
+    // Teacher profile
+    if (pathname === "/teacher-profile") {
+      const session = getSession(request);
+      if (!session || session.role !== "teacher") {
+        response.writeHead(302, { Location: "/teacher-login" });
+        response.end();
+        return;
+      }
+      return serveStatic(
+        path.join(__dirname, "files/teacher-profile.html"),
+        response,
+      );
+    }
+
+    // Student profile
     if (pathname === "/profile") {
       const session = getSession(request);
       if (!session) {
-        response.writeHead(403, { "Content-Type": "text/plain" });
-        response.end("Access denied. Please log in first.");
+        response.writeHead(302, { Location: "/login" });
+        response.end();
         return;
       }
+      return serveStatic(path.join(__dirname, "files/profile.html"), response);
     }
 
+    // Public pages
+    const pageMap = {
+      "/login": "files/login.html",
+      "/register": "files/register.html",
+      "/teacher-login": "files/teacher-login.html",
+      "/teacher-register": "files/teacher-register.html",
+      "/contact": "files/contact.html",
+      "/tour": "files/tour.html",
+    };
+
+    if (pageMap[pathname]) {
+      return serveStatic(path.join(__dirname, pageMap[pathname]), response);
+    }
+
+    // Static assets (CSS, images, JS)
     const safePath = path.join(__dirname, pathname);
     if (!safePath.startsWith(__dirname)) {
       response.writeHead(403, { "Content-Type": "text/plain" });
       response.end("Forbidden");
       return;
     }
-
     if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
-      serveStatic(safePath, response);
-      return;
+      return serveStatic(safePath, response);
     }
 
     response.writeHead(404, { "Content-Type": "text/plain" });
@@ -381,18 +625,34 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  // ── POST REQUESTS ───────────────────────────────────────────────────────────
+
+  // Student / Admin login
   if (request.method === "POST" && pathname === "/login") {
+    const ip = request.socket.remoteAddress;
+    if (isRateLimited(ip)) {
+      response.writeHead(429, { "Content-Type": "application/json" });
+      response.end(
+        JSON.stringify({
+          success: false,
+          message: "Too many login attempts. Please wait 15 minutes.",
+        }),
+      );
+      return;
+    }
     parseBody(request, (data) => {
-      const result = authenticateLogin(data, "student");
+      const result = authenticateLogin(data, null);
+      if (result.success) delete loginAttempts[ip];
       const headers = { "Content-Type": "application/json" };
       if (result.success) {
         const sessionId = generateSessionId();
         sessions[sessionId] = {
           email: data.email.trim().toLowerCase(),
-          role: "student",
+          role: result.user.role,
           expires: Date.now() + 3600 * 1000,
         };
-        headers["Set-Cookie"] = `sessionId=${sessionId}; HttpOnly; Path=/; Max-Age=3600`;
+        headers["Set-Cookie"] =
+          `sessionId=${sessionId}; HttpOnly; Path=/; Max-Age=3600`;
       }
       response.writeHead(result.success ? 200 : 401, headers);
       response.end(JSON.stringify(result));
@@ -400,9 +660,22 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  // Teacher login
   if (request.method === "POST" && pathname === "/teacher-login") {
+    const ip = request.socket.remoteAddress;
+    if (isRateLimited(ip)) {
+      response.writeHead(429, { "Content-Type": "application/json" });
+      response.end(
+        JSON.stringify({
+          success: false,
+          message: "Too many login attempts. Please wait 15 minutes.",
+        }),
+      );
+      return;
+    }
     parseBody(request, (data) => {
       const result = authenticateLogin(data, "teacher");
+      if (result.success) delete loginAttempts[ip];
       const headers = { "Content-Type": "application/json" };
       if (result.success) {
         const sessionId = generateSessionId();
@@ -411,7 +684,8 @@ const server = http.createServer((request, response) => {
           role: "teacher",
           expires: Date.now() + 3600 * 1000,
         };
-        headers["Set-Cookie"] = `sessionId=${sessionId}; HttpOnly; Path=/; Max-Age=3600`;
+        headers["Set-Cookie"] =
+          `sessionId=${sessionId}; HttpOnly; Path=/; Max-Age=3600`;
       }
       response.writeHead(result.success ? 200 : 401, headers);
       response.end(JSON.stringify(result));
@@ -419,6 +693,7 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  // Student registration
   if (request.method === "POST" && pathname === "/register") {
     parseBody(request, (data) => {
       const result = registerUser(data);
@@ -430,6 +705,19 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  // Teacher application
+  if (request.method === "POST" && pathname === "/teacher-register") {
+    parseBody(request, (data) => {
+      const result = registerTeacherApplication(data);
+      response.writeHead(result.success ? 200 : 400, {
+        "Content-Type": "application/json",
+      });
+      response.end(JSON.stringify(result));
+    });
+    return;
+  }
+
+  // Contact form
   if (request.method === "POST" && pathname === "/contact") {
     parseBody(request, (data) => {
       const enquiry = {
@@ -446,7 +734,7 @@ const server = http.createServer((request, response) => {
           enquiries = JSON.parse(
             fs.readFileSync(enquiriesPath, "utf8") || "[]",
           );
-        } catch (error) {
+        } catch (e) {
           enquiries = [];
         }
       }
@@ -456,18 +744,77 @@ const server = http.createServer((request, response) => {
         JSON.stringify(enquiries, null, 2),
         "utf8",
       );
+
+      // Send email to school
+      sendContactEmail(enquiry).catch(() => null);
+
       response.writeHead(200, { "Content-Type": "application/json" });
       response.end(
-        JSON.stringify({
-          success: true,
-          message:
-            "Enquiry captured and ready to send to vickayorprivateschool@gmail.com.",
-        }),
+        JSON.stringify({ success: true, message: "Enquiry received." }),
       );
     });
     return;
   }
 
+  // Admin — approve teacher
+  if (request.method === "POST" && pathname === "/admin/approve") {
+    const session = getSession(request);
+    if (!session || session.role !== "admin") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Access denied." }));
+      return;
+    }
+    parseBody(request, (data) => {
+      const result = approveTeacher(data.email);
+      response.writeHead(result.success ? 200 : 400, {
+        "Content-Type": "application/json",
+      });
+      response.end(JSON.stringify(result));
+    });
+    return;
+  }
+
+  // Admin — reject teacher
+  if (request.method === "POST" && pathname === "/admin/reject") {
+    const session = getSession(request);
+    if (!session || session.role !== "admin") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Access denied." }));
+      return;
+    }
+    parseBody(request, (data) => {
+      const result = rejectTeacherApplication(data.email);
+      response.writeHead(result.success ? 200 : 400, {
+        "Content-Type": "application/json",
+      });
+      response.end(JSON.stringify(result));
+    });
+    return;
+  }
+
+  // Admin — remove teacher
+  if (request.method === "POST" && pathname === "/admin/remove-teacher") {
+    const session = getSession(request);
+    if (!session || session.role !== "admin") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Access denied." }));
+      return;
+    }
+    parseBody(request, (data) => {
+      const usersFile = readUsersFile();
+      usersFile.users = (usersFile.users || []).filter(
+        (u) => u.email !== (data.email || "").trim().toLowerCase(),
+      );
+      saveUsersFile(usersFile);
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(
+        JSON.stringify({ success: true, message: "Teacher removed." }),
+      );
+    });
+    return;
+  }
+
+  // Fallback 404
   response.writeHead(404, { "Content-Type": "text/plain" });
   response.end("404 Not Found");
 });

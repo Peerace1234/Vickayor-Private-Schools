@@ -5,19 +5,32 @@
       "email": "parent@vickayor.edu",
       "password": "Vickayor123",
       "role": "student",
-      "verified": true
+      "verified": true,
+      "status": "approved"
     },
     {
       "name": "Teacher Admin",
       "email": "teacher@vickayor.edu",
       "password": "Teacher123!",
       "role": "teacher",
-      "verified": true
+      "verified": true,
+      "status": "approved"
     },
     {
-      "name": "Test User",
-      "email": "testuser@example.com",
-      "password": "Password123"
+      "name": "John Admin",
+      "email": "johnoluwadarasimi37@gmail.com",
+      "password": "Vickayor@24",
+      "role": "admin",
+      "verified": true,
+      "status": "approved"
+    },
+    {
+      "name": "Florence",
+      "email": "florenceoluwayemisi37@gmail.com",
+      "password": "1d3528da1e8fb4ba946e530b5a495b83:22e36c243789cbb8f642307c2d5240fbfba7d5814b3265f3f8da29d418fb944365886fda1a1a74957335c562c9ded78da157dc65b3ebf46cebf94efecf4e2123",
+      "role": "student",
+      "verified": true,
+      "status": "approved"
     }
   ]
 }

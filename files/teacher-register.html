@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Registration | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="nav_section">
+        <div class="left_section">
+            <a href="/">Home</a>
+            <a href="/tour">Tour</a>
+        </div>
+        <div class="info">
+            <div class="brand">
+                <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo" class="brand-logo">
+                <div>
+                    <h1>Vickayor Private School</h1>
+                    <h6>Teacher Registration</h6>
+                </div>
+            </div>
+        </div>
+        <div class="right_section">
+            <a href="/login">Student Login</a>
+            <a href="/teacher-login">Teacher Login</a>
+            <a href="/contact">Contact Us</a>
+        </div>
+    </div>
+
+    <main class="page-content">
+        <section class="page-header">
+            <div class="hero-grid">
+                <div class="header_description">
+                    <h1>Apply for a Teacher Account</h1>
+                    <p>Submit your details below. The school admin will review and approve your account before you can log in.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-section">
+            <div class="auth-card">
+                <h2>Teacher Application</h2>
+
+                <div id="message" style="display:none; padding:12px; border-radius:12px; margin-bottom:16px; font-weight:600;"></div>
+
+                <form id="teacher-register-form">
+                    <div class="label-group">
+                        <label>Full Name</label>
+                        <input type="text" id="name" placeholder="Your full name" required>
+                    </div>
+                    <div class="label-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="label-group">
+                        <label>Subject Specialization</label>
+                        <input type="text" id="subject" placeholder="e.g. Mathematics, English">
+                    </div>
+                    <div class="label-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="phone" placeholder="+234 000 000 0000">
+                    </div>
+                    <div class="label-group">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="Create a strong password">
+                        <button class="password-toggle secondary-btn" type="button">Show password</button>
+                    </div>
+                    <button class="primary-btn" type="submit">Submit Application</button>
+                </form>
+            </div>
+
+            <div class="info-card">
+                <h3>How it works</h3>
+                <p>1. Fill in your details and submit the form.</p>
+                <p>2. The school admin reviews your application.</p>
+                <p>3. Once approved, you'll receive confirmation.</p>
+                <p>4. You can then log in using your credentials.</p>
+                <br>
+                <p><strong>Questions?</strong></p>
+                <p>Email: vickayorprivateschool@gmail.com</p>
+                <p>Phone: +234 706 595 0300</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer_section">
+        <p>© 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Password toggle
+        document.querySelector('.password-toggle').addEventListener('click', function() {
+            const input = document.getElementById('password');
+            const hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            this.textContent = hidden ? 'Hide password' : 'Show password';
+        });
+
+        // Form submit
+        document.getElementById('teacher-register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/teacher-register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
+                });
+                const result = await response.json();
+                showMessage(result.message, result.success);
+            } catch(err) {
+                showMessage('Something went wrong. Please try again.', false);
+            }
+        });
+
+        function showMessage(msg, success) {
+            const box = document.getElementById('message');
+            box.textContent = msg;
+            box.style.display = 'block';
+            box.style.background = success ? '#dafcd6' : '#ffd7d7';
+            box.style.color = success ? 'green' : 'red';
+        }
+    </script>
+</body>
+</html>

@@ -36,12 +36,12 @@
         <section class="contact-section">
             <div class="form-card">
                 <h2>Send a message</h2>
-                <form id="contact-form">
+                <form id="contact-form" action="/send" method="/post">
                     <label class="label-group" for="name">Full Name
                         <input type="text" id="name" name="name" placeholder="Your full name" required>
                     </label>
-                    <label class="label-group" for="email">Email Address
-                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                    <label class="label-group" for="from">Email Address
+                        <input type="email" id="from" name="from" placeholder="you@example.com" required>
                     </label>
                     <label class="label-group" for="subject">Subject
                         <input type="text" id="subject" name="subject" placeholder="Reason for contacting" required>

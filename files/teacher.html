@@ -33,27 +33,29 @@
             <div class="panel-card">
                 <h2>Student roster</h2>
                 <p>Add and remove students from your class list.</p>
-                <form class="dashboard-form">
+                <form class="dashboard-form" id="teacher-student-form">
                     <label class="label-group" for="student-name">Student Name
                         <input type="text" id="student-name" name="student-name" placeholder="Student full name">
+                    </label>
+                    <label class="label-group" for="student-email">Student Email
+                        <input type="email" id="student-email" name="student-email" placeholder="Student email address">
                     </label>
                     <label class="label-group" for="student-id">Student ID
                         <input type="text" id="student-id" name="student-id" placeholder="Student ID">
                     </label>
                     <div class="button-row">
-                        <button class="primary-btn" type="button">Add Student</button>
-                        <button class="secondary-btn" type="button">Remove Student</button>
+                        <button class="primary-btn" type="button" onclick="handleAddStudent()">Add Student</button>
+                        <button class="secondary-btn" type="button" onclick="handleRemoveStudent()">Remove Student</button>
                     </div>
                 </form>
+                <div id="teacher-message" class="login-message" style="display:none; margin-top:16px;"></div>
                 <div class="table-container">
                     <table class="dashboard-table">
                         <thead>
-                            <tr><th>Name</th><th>ID</th><th>Class</th><th>Status</th></tr>
+                            <tr><th>Name</th><th>ID</th><th>Email</th><th>Status</th></tr>
                         </thead>
-                        <tbody>
-                            <tr><td>Samuel Aden</td><td>STU001</td><td>Primary 4</td><td><span class="status-pill present">Active</span></td></tr>
-                            <tr><td>Zara Okoro</td><td>STU002</td><td>Primary 4</td><td><span class="status-pill present">Active</span></td></tr>
-                            <tr><td>Faith Emeka</td><td>STU003</td><td>Primary 4</td><td><span class="status-pill absent">Inactive</span></td></tr>
+                        <tbody id="student-roster-body">
+                            <tr><td colspan="4" style="text-align:center; padding:24px;">Loading student roster...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -85,7 +87,7 @@
                     <label class="label-group" for="activity-date">Date
                         <input type="date" id="activity-date" name="activity-date">
                     </label>
-                    <button class="primary-btn" type="button">Add activity</button>
+                    <button class="primary-btn" type="button" onclick="handleAddActivity()">Add activity</button>
                 </form>
                 <div class="table-container">
                     <table class="dashboard-table">
@@ -125,6 +127,85 @@
             </div>
         </section>
     </main>
+    <script>
+      function showTeacherMessage(text, success = true) {
+        const messageEl = document.getElementById("teacher-message");
+        messageEl.textContent = text;
+        messageEl.style.display = "block";
+        messageEl.style.color = success ? "#0f5132" : "#842029";
+        messageEl.style.background = success ? "#d1e7dd" : "#f8d7da";
+        messageEl.style.border = success ? "1px solid #badbcc" : "1px solid #f5c2c7";
+      }
+
+      async function loadStudentRoster() {
+        try {
+          const response = await fetch("/teacher/students");
+          if (!response.ok) throw new Error("Unable to load students.");
+          const data = await response.json();
+          const tbody = document.getElementById("student-roster-body");
+          if (!data.students || data.students.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="4" style="text-align:center; padding:24px;">No students added yet.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.students
+            .map(
+              (student) =>
+                `<tr><td>${student.name}</td><td>${student.studentId || "N/A"}</td><td>${student.email}</td><td><span class="status-pill present">${student.status}</span></td></tr>`,
+            )
+            .join("");
+        } catch (error) {
+          document.getElementById("student-roster-body").innerHTML =
+            '<tr><td colspan="4" style="text-align:center; padding:24px;">Failed to load roster.</td></tr>';
+        }
+      }
+
+      async function handleAddStudent() {
+        const name = document.getElementById("student-name").value.trim();
+        const email = document.getElementById("student-email").value.trim();
+        const studentId = document.getElementById("student-id").value.trim();
+        if (!name || !email) {
+          showTeacherMessage("Student name and email are required.", false);
+          return;
+        }
+        const response = await fetch("/teacher/add_student", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ name, email, studentId }),
+        });
+        const result = await response.json();
+        showTeacherMessage(result.message, result.success);
+        if (result.success) {
+          document.getElementById("teacher-student-form").reset();
+          loadStudentRoster();
+        }
+      }
+
+      async function handleRemoveStudent() {
+        const email = document.getElementById("student-email").value.trim();
+        const studentId = document.getElementById("student-id").value.trim();
+        if (!email && !studentId) {
+          showTeacherMessage(
+            "Enter the student's email or ID to remove them.",
+            false,
+          );
+          return;
+        }
+        const response = await fetch("/teacher/remove_student", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ email, studentId }),
+        });
+        const result = await response.json();
+        showTeacherMessage(result.message, result.success);
+        if (result.success) {
+          document.getElementById("teacher-student-form").reset();
+          loadStudentRoster();
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", loadStudentRoster);
+    </script>
     <footer class="footer_section">
         <p>© 2026 Vickayor Private School. All rights reserved.</p>
     </footer>

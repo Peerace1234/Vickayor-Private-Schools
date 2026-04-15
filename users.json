@@ -31,6 +31,42 @@
       "role": "student",
       "verified": true,
       "status": "approved"
+    },
+    {
+      "name": "john praise Babalola",
+      "email": "babalolapraisev23@gmail.com",
+      "password": "50cd5e5aedf92c8dae0649c166010d8f:48f8d9cb7b9709594237588a769a435c902afe24c363c6a849e7d5ba6f589450db2e8eac32583a9ff8eac6fc456dc759ddd7da28747416f094bd53afe9ddd0b7",
+      "role": "teacher",
+      "verified": true,
+      "status": "approved",
+      "subject": "Data Processing",
+      "phone": "+2347034579933"
+    },
+    {
+      "name": "Toheeb",
+      "email": "toheebmudasiru73@gmail.com",
+      "password": "72ac906bdb76c4a58bf9075531993e95:29e6b947de3dcea399d430dab8248e66da0456c0f9b822772cb2b65a1df73227a2f0e32aadce85ea45b7d36274888c89a1d2245640c42c4572b9b536c5bcf949",
+      "role": "student",
+      "verified": true,
+      "status": "approved"
+    },
+    {
+      "name": "Victor",
+      "email": "victorapobi21@gmail.com",
+      "password": "a7a7d107d71b2f4e4537c2e061a53200:55bec473e4fff50489058f634a2e212043d42c2385f37fcf1690fafd9ed8b3ff0a974374a49ae95b7cdf9b9a82c36b72bb8d7f9ec8a2da39358498427b7babfd",
+      "role": "student",
+      "verified": true,
+      "status": "approved",
+      "studentId": "202604"
+    },
+    {
+      "name": "Victor",
+      "email": "victorapabio21@gmail.com",
+      "password": "801597a6110c92171fb48a0c1df0f65f:ae578b2202564f4085580465b1dc03be2b9477320404a85d6a8bdeda8820a45b2b97e69c5c48f0020df79fa18cd4fbb7ecf223980476ea2be10c0bbee7eaaad7",
+      "role": "student",
+      "verified": true,
+      "status": "approved",
+      "studentId": "202604"
     }
   ]
 }

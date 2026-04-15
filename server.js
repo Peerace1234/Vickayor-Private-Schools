@@ -118,17 +118,64 @@ function verifyPassword(password, storedPassword) {
   }
 }
 
+function generateRandomPassword(length = 10) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let password = "";
+  const bytes = crypto.randomBytes(length);
+  for (let i = 0; i < length; i++) {
+    password += chars[bytes[i] % chars.length];
+  }
+  return password;
+}
+
 // ─── USERS FILE ──────────────────────────────────────────────────────────────
+function backupInvalidUsersFile(filePath) {
+  const backupPath = path.join(
+    __dirname,
+    `users.json.corrupt.${Date.now()}.bak`,
+  );
+  try {
+    fs.renameSync(filePath, backupPath);
+    console.error(
+      `Backed up corrupt users.json to ${backupPath}. A fresh users.json has been created.`,
+    );
+  } catch (backupError) {
+    console.error("Failed to backup corrupt users.json:", backupError);
+  }
+}
+
 function readUsersFile() {
   const filePath = path.join(__dirname, "users.json");
   if (!fs.existsSync(filePath)) return { users: [] };
-  const raw = fs.readFileSync(filePath, "utf8");
-  return JSON.parse(raw || '{"users": []}');
+  try {
+    const raw = fs.readFileSync(filePath, "utf8");
+    return JSON.parse(raw || '{"users": []}');
+  } catch (error) {
+    console.error("Failed to read users.json:", error);
+    backupInvalidUsersFile(filePath);
+    try {
+      fs.writeFileSync(
+        filePath,
+        JSON.stringify({ users: [] }, null, 2),
+        "utf8",
+      );
+    } catch (writeError) {
+      console.error("Failed to recreate users.json after backup:", writeError);
+    }
+    return { users: [] };
+  }
 }
 
 function saveUsersFile(data) {
   const filePath = path.join(__dirname, "users.json");
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+    return true;
+  } catch (error) {
+    console.error("Failed to save users.json:", error);
+    return false;
+  }
 }
 
 function findUserByEmail(email) {
@@ -452,6 +499,84 @@ function rejectTeacherApplication(email) {
   return {
     success: true,
     message: "Application rejected and applicant notified.",
+  };
+}
+
+function addStudent(data) {
+  const name = (data.name || "").trim();
+  const email = (data.email || "").trim().toLowerCase();
+  const studentId = (data.studentId || "").trim();
+  if (!name || !email) {
+    return {
+      success: false,
+      message: "Student name and email are required.",
+    };
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { success: false, message: "Please enter a valid email address." };
+  }
+  const usersFile = readUsersFile();
+  const users = usersFile.users || [];
+  if (users.some((u) => u.email === email)) {
+    return {
+      success: false,
+      message: "A student with this email already exists.",
+    };
+  }
+  const salt = generateSalt();
+  const password = generateRandomPassword(10);
+  users.push({
+    name,
+    email,
+    password: hashPassword(password, salt),
+    role: "student",
+    verified: true,
+    status: "approved",
+    studentId,
+  });
+
+  if (!saveUsersFile({ users })) {
+    return {
+      success: false,
+      message: "Unable to save student. Please try again later.",
+    };
+  }
+
+  // Send welcome email to student if possible
+  sendWelcomeEmail(email, name).catch(() => null);
+
+  return {
+    success: true,
+    message: "Student added successfully.",
+    password,
+  };
+}
+
+function removeStudent(data) {
+  const email = (data.email || "").trim().toLowerCase();
+  const studentId = (data.studentId || "").trim();
+  if (!email && !studentId) {
+    return {
+      success: false,
+      message: "Student email or ID is required to remove a student.",
+    };
+  }
+  const usersFile = readUsersFile();
+  const users = usersFile.users || [];
+  const student = users.find(
+    (u) =>
+      u.role === "student" &&
+      (u.email === email || (studentId && u.studentId === studentId)),
+  );
+  if (!student) {
+    return { success: false, message: "Student not found." };
+  }
+  usersFile.users = users.filter((u) => u !== student);
+  saveUsersFile(usersFile);
+  return {
+    success: true,
+    message: `${student.name} has been removed from the student roster.`,
   };
 }
 
@@ -810,6 +935,86 @@ const server = http.createServer((request, response) => {
       response.end(
         JSON.stringify({ success: true, message: "Teacher removed." }),
       );
+    });
+    return;
+  }
+
+  // Teacher — list student roster
+  if (request.method === "GET" && pathname === "/teacher/students") {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Access denied." }));
+      return;
+    }
+    const usersFile = readUsersFile();
+    const students = (usersFile.users || [])
+      .filter((u) => u.role === "student")
+      .map(({ name, email, studentId, status }) => ({
+        name,
+        email,
+        studentId: studentId || "",
+        status: status || "active",
+      }));
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({ students }));
+    return;
+  }
+
+  // teacher — add student
+  if (request.method === "POST" && pathname === "/teacher/add_student") {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Access denied." }));
+      return;
+    }
+    parseBody(request, (data) => {
+      try {
+        const result = addStudent(data);
+        response.writeHead(result.success ? 200 : 400, {
+          "Content-Type": "application/json",
+        });
+        response.end(JSON.stringify(result));
+      } catch (error) {
+        console.error("Failed to add student:", error);
+        response.writeHead(500, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: false,
+            message: "Server error while adding student.",
+          }),
+        );
+      }
+    });
+    return;
+  }
+
+  // teacher — remove student
+  if (request.method === "POST" && pathname === "/teacher/remove_student") {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Access denied" }));
+      return;
+    }
+    parseBody(request, (data) => {
+      try {
+        const result = removeStudent(data);
+        response.writeHead(result.success ? 200 : 400, {
+          "Content-Type": "application/json",
+        });
+        response.end(JSON.stringify(result));
+      } catch (error) {
+        console.error("Failed to remove student:", error);
+        response.writeHead(500, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: false,
+            message: "Server error while removing student.",
+          }),
+        );
+      }
     });
     return;
   }

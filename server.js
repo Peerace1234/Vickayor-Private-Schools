@@ -309,16 +309,20 @@ function sendContactEmail(enquiry) {
     console.log("Email not configured. Contact enquiry saved locally only.");
     return Promise.resolve(false);
   }
+  const schoolEmail =
+    process.env.SCHOOL_EMAIL ||
+    process.env.SMTP_USER ||
+    "vickayorprivateschool@gmail.com";
   return transporter
     .sendMail({
       from: process.env.EMAIL_FROM || process.env.SMTP_USER,
-      to: process.env.SMTP_USER,
+      to: schoolEmail,
       replyTo: enquiry.email,
       subject: `New Enquiry from ${enquiry.name}: ${enquiry.subject}`,
       text: `You have a new enquiry from your school website.\n\nName: ${enquiry.name}\nEmail: ${enquiry.email}\nSubject: ${enquiry.subject}\n\nMessage:\n${enquiry.message}\n\nSent: ${enquiry.date}`,
     })
     .then(() => {
-      console.log("Contact email sent to school.");
+      console.log("Contact email sent to school:", schoolEmail);
       return true;
     })
     .catch((error) => {

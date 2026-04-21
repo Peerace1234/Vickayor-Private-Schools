@@ -609,7 +609,7 @@ function verifyAccountWithToken(token) {
 
 // ─── SERVER ───────────────────────────────────────────────────────────────────
 const server = http.createServer((request, response) => {
-  const parsedUrl = url.parse(request.url, true);
+  const parsedUrl = new URL(request.url, "http://localhost");
   let pathname = decodeURIComponent(parsedUrl.pathname || "");
   pathname = pathname.replace(/\/+$|^\s+|\s+$/g, "") || "/";
 
@@ -635,7 +635,9 @@ const server = http.createServer((request, response) => {
 
     // Email verification
     if (pathname === "/verify") {
-      const result = verifyAccountWithToken(parsedUrl.query.token);
+      const result = verifyAccountWithToken(
+        parsedUrl.searchParams.get("token"),
+      );
       response.writeHead(200, { "Content-Type": "text/html" });
       response.end(
         `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Verification</title></head><body style="font-family:Arial,sans-serif;padding:32px;"><h1>${result.success ? "✅ Verified!" : "❌ Failed"}</h1><p>${result.message}</p><a href="/login">Go to login</a></body></html>`,

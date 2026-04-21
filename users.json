@@ -9,14 +9,6 @@
       "status": "approved"
     },
     {
-      "name": "Teacher Admin",
-      "email": "teacher@vickayor.edu",
-      "password": "Teacher123!",
-      "role": "teacher",
-      "verified": true,
-      "status": "approved"
-    },
-    {
       "name": "John Admin",
       "email": "johnoluwadarasimi37@gmail.com",
       "password": "Vickayor@24",

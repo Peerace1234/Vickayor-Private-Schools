@@ -4,13 +4,22 @@
   "description": "Vickayor Private School website with backend login authentication.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "api": "node api-server.js",
+    "dev": "node server.js & node api-server.js"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "nodemailer": "^8.0.5"
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "mysql2": "^3.22.3",
+    "nodemailer": "^8.0.5",
+    "socket.io": "^4.8.3"
   }
 }

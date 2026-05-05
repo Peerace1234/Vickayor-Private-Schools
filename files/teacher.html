@@ -63,24 +63,28 @@
             <div class="panel-card">
                 <h2>Attendance</h2>
                 <p>Mark student attendance for today and review attendance summaries.</p>
+                <div style="margin-bottom: 16px;">
+                    <label for="attendance-date">Select Date:</label>
+                    <input type="date" id="attendance-date" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <button class="primary-btn" type="button" onclick="loadAttendance()" style="margin-left: 8px;">Load Attendance</button>
+                </div>
+                <div id="attendance-message" class="login-message" style="display:none; margin-bottom:16px;"></div>
                 <div class="table-container">
                     <table class="dashboard-table">
                         <thead>
                             <tr><th>Student</th><th>Present</th><th>Absent</th><th>Late</th></tr>
                         </thead>
-                        <tbody>
-                            <tr><td>Samuel Aden</td><td><button class="pill-btn">✔</button></td><td><button class="pill-btn">–</button></td><td><button class="pill-btn">–</button></td></tr>
-                            <tr><td>Zara Okoro</td><td><button class="pill-btn">✔</button></td><td><button class="pill-btn">–</button></td><td><button class="pill-btn">–</button></td></tr>
-                            <tr><td>Faith Emeka</td><td><button class="pill-btn">–</button></td><td><button class="pill-btn">✔</button></td><td><button class="pill-btn">–</button></td></tr>
+                        <tbody id="attendance-body">
+                            <tr><td colspan="4" style="text-align:center; padding:24px;">Select a date and click "Load Attendance" to start marking.</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <button class="primary-btn" type="button">Save attendance</button>
+                <button class="primary-btn" type="button" onclick="saveAttendance()">Save Attendance</button>
             </div>
             <div class="panel-card">
                 <h2>Classroom activities</h2>
                 <p>Create new activities and keep the class schedule organized.</p>
-                <form class="dashboard-form">
+                <form class="dashboard-form" id="activity-form">
                     <label class="label-group" for="activity-name">Activity name
                         <input type="text" id="activity-name" name="activity-name" placeholder="Science project">
                     </label>
@@ -89,12 +93,13 @@
                     </label>
                     <button class="primary-btn" type="button" onclick="handleAddActivity()">Add activity</button>
                 </form>
+                <div id="activity-message" class="login-message" style="display:none; margin-top:16px;"></div>
                 <div class="table-container">
                     <table class="dashboard-table">
                         <thead>
                             <tr><th>Activity</th><th>Date</th><th>Status</th></tr>
                         </thead>
-                        <tbody>
+                        <tbody id="activities-body">
                             <tr><td>Math competition</td><td>2026-05-12</td><td><span class="status-pill present">Planned</span></td></tr>
                             <tr><td>Reading circle</td><td>2026-05-15</td><td><span class="status-pill present">Scheduled</span></td></tr>
                         </tbody>
@@ -104,23 +109,23 @@
             <div class="panel-card">
                 <h2>Parent contact</h2>
                 <p>Send a message to parents or review parent contact details.</p>
-                <form class="dashboard-form">
+                <form class="dashboard-form" id="parent-message-form">
                     <label class="label-group" for="parent-name">Parent name
                         <input type="text" id="parent-name" name="parent-name" placeholder="Parent or guardian name">
                     </label>
                     <label class="label-group" for="parent-message">Message
                         <textarea id="parent-message" name="parent-message" rows="5" placeholder="Message to parent"></textarea>
                     </label>
-                    <button class="primary-btn" type="button">Send message</button>
+                    <button class="primary-btn" type="button" onclick="handleSendParentMessage()">Send message</button>
                 </form>
+                <div id="parent-message-display" class="login-message" style="display:none; margin-top:16px;"></div>
                 <div class="table-container">
                     <table class="dashboard-table">
                         <thead>
                             <tr><th>Student</th><th>Parent</th><th>Phone</th></tr>
                         </thead>
-                        <tbody>
-                            <tr><td>Samuel Aden</td><td>Mrs. Aden</td><td>+234 800 123 9001</td></tr>
-                            <tr><td>Zara Okoro</td><td>Mr. Okoro</td><td>+234 800 123 9002</td></tr>
+                        <tbody id="parent-contacts-body">
+                            <tr><td colspan="3" style="text-align:center; padding:24px;">Loading parent contacts...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -128,8 +133,38 @@
         </section>
     </main>
     <script>
+      let attendanceData = {}; // Store attendance state { studentId: { status, name } }
+      let currentStudents = [];
+
       function showTeacherMessage(text, success = true) {
         const messageEl = document.getElementById("teacher-message");
+        messageEl.textContent = text;
+        messageEl.style.display = "block";
+        messageEl.style.color = success ? "#0f5132" : "#842029";
+        messageEl.style.background = success ? "#d1e7dd" : "#f8d7da";
+        messageEl.style.border = success ? "1px solid #badbcc" : "1px solid #f5c2c7";
+      }
+
+      function showAttendanceMessage(text, success = true) {
+        const messageEl = document.getElementById("attendance-message");
+        messageEl.textContent = text;
+        messageEl.style.display = "block";
+        messageEl.style.color = success ? "#0f5132" : "#842029";
+        messageEl.style.background = success ? "#d1e7dd" : "#f8d7da";
+        messageEl.style.border = success ? "1px solid #badbcc" : "1px solid #f5c2c7";
+      }
+
+      function showActivityMessage(text, success = true) {
+        const messageEl = document.getElementById("activity-message");
+        messageEl.textContent = text;
+        messageEl.style.display = "block";
+        messageEl.style.color = success ? "#0f5132" : "#842029";
+        messageEl.style.background = success ? "#d1e7dd" : "#f8d7da";
+        messageEl.style.border = success ? "1px solid #badbcc" : "1px solid #f5c2c7";
+      }
+
+      function showParentMessage(text, success = true) {
+        const messageEl = document.getElementById("parent-message-display");
         messageEl.textContent = text;
         messageEl.style.display = "block";
         messageEl.style.color = success ? "#0f5132" : "#842029";
@@ -142,13 +177,14 @@
           const response = await fetch("/teacher/students");
           if (!response.ok) throw new Error("Unable to load students.");
           const data = await response.json();
+          currentStudents = data.students || [];
           const tbody = document.getElementById("student-roster-body");
-          if (!data.students || data.students.length === 0) {
+          if (!currentStudents || currentStudents.length === 0) {
             tbody.innerHTML =
               '<tr><td colspan="4" style="text-align:center; padding:24px;">No students added yet.</td></tr>';
             return;
           }
-          tbody.innerHTML = data.students
+          tbody.innerHTML = currentStudents
             .map(
               (student) =>
                 `<tr><td>${student.name}</td><td>${student.studentId || "N/A"}</td><td>${student.email}</td><td><span class="status-pill present">${student.status}</span></td></tr>`,
@@ -157,6 +193,131 @@
         } catch (error) {
           document.getElementById("student-roster-body").innerHTML =
             '<tr><td colspan="4" style="text-align:center; padding:24px;">Failed to load roster.</td></tr>';
+        }
+      }
+
+      async function loadAttendance() {
+        try {
+          const dateInput = document.getElementById("attendance-date").value;
+          if (!dateInput) {
+            showAttendanceMessage("Please select a date first.", false);
+            return;
+          }
+          
+          // Load students for attendance
+          await loadStudentRoster();
+          if (!currentStudents || currentStudents.length === 0) {
+            showAttendanceMessage("No students available for this class.", false);
+            return;
+          }
+
+          // Initialize attendance state
+          attendanceData = {};
+          currentStudents.forEach(student => {
+            attendanceData[student.studentId || student.email] = {
+              status: "absent",
+              name: student.name,
+              email: student.email
+            };
+          });
+
+          // Render attendance table
+          const tbody = document.getElementById("attendance-body");
+          tbody.innerHTML = currentStudents.map((student) => {
+            const key = student.studentId || student.email;
+            return `
+              <tr>
+                <td>${student.name}</td>
+                <td>
+                  <button class="pill-btn" onclick="markAttendance('${key}', 'present')" 
+                    id="btn-present-${key}" style="background: ${attendanceData[key]?.status === 'present' ? '#28a745' : '#ddd'}; color: ${attendanceData[key]?.status === 'present' ? 'white' : 'black'};">
+                    ✔
+                  </button>
+                </td>
+                <td>
+                  <button class="pill-btn" onclick="markAttendance('${key}', 'absent')"
+                    id="btn-absent-${key}" style="background: ${attendanceData[key]?.status === 'absent' ? '#dc3545' : '#ddd'}; color: ${attendanceData[key]?.status === 'absent' ? 'white' : 'black'};">
+                    ✗
+                  </button>
+                </td>
+                <td>
+                  <button class="pill-btn" onclick="markAttendance('${key}', 'late')"
+                    id="btn-late-${key}" style="background: ${attendanceData[key]?.status === 'late' ? '#ffc107' : '#ddd'}; color: ${attendanceData[key]?.status === 'late' ? 'white' : 'black'};">
+                    ⏱
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join("");
+          
+          showAttendanceMessage(`Attendance loaded for ${dateInput}. Click buttons to mark students.`, true);
+        } catch (error) {
+          showAttendanceMessage("Error loading attendance: " + error.message, false);
+        }
+      }
+
+      function markAttendance(key, status) {
+        if (attendanceData[key]) {
+          attendanceData[key].status = status;
+          
+          // Update button styles
+          const statusOptions = ['present', 'absent', 'late'];
+          statusOptions.forEach(opt => {
+            const btn = document.getElementById(`btn-${opt}-${key}`);
+            if (btn) {
+              if (opt === status) {
+                btn.style.background = opt === 'present' ? '#28a745' : (opt === 'absent' ? '#dc3545' : '#ffc107');
+                btn.style.color = 'white';
+              } else {
+                btn.style.background = '#ddd';
+                btn.style.color = 'black';
+              }
+            }
+          });
+        }
+      }
+
+      async function saveAttendance() {
+        try {
+          const dateInput = document.getElementById("attendance-date").value;
+          if (!dateInput) {
+            showAttendanceMessage("Please select a date.", false);
+            return;
+          }
+
+          const attendanceRecords = Object.entries(attendanceData).map(([key, data]) => ({
+            student_identifier: key,
+            student_name: data.name,
+            status: data.status,
+            date: dateInput
+          }));
+
+          if (attendanceRecords.length === 0) {
+            showAttendanceMessage("No attendance marked.", false);
+            return;
+          }
+
+          const response = await fetch("/teacher/save_attendance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              date: dateInput,
+              records: attendanceRecords
+            })
+          });
+
+          const result = await response.json();
+          showAttendanceMessage(result.message || (result.success ? "Attendance saved successfully!" : "Failed to save attendance."), result.success);
+          
+          if (result.success) {
+            // Clear the form
+            document.getElementById("attendance-date").value = "";
+            attendanceData = {};
+            document.getElementById("attendance-body").innerHTML = 
+              '<tr><td colspan="4" style="text-align:center; padding:24px;">Select a date and click "Load Attendance" to start marking.</td></tr>';
+          }
+        } catch (error) {
+          showAttendanceMessage("Error saving attendance: " + error.message, false);
         }
       }
 
@@ -204,7 +365,124 @@
         }
       }
 
-      window.addEventListener("DOMContentLoaded", loadStudentRoster);
+      async function handleAddActivity() {
+        const activityName = document.getElementById("activity-name").value.trim();
+        const activityDate = document.getElementById("activity-date").value;
+        
+        if (!activityName || !activityDate) {
+          showActivityMessage("Activity name and date are required.", false);
+          return;
+        }
+
+        try {
+          const response = await fetch("/teacher/add_activity", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: activityName,
+              date: activityDate
+            })
+          });
+
+          const result = await response.json();
+          showActivityMessage(result.message, result.success);
+          
+          if (result.success) {
+            document.getElementById("activity-form").reset();
+            // Reload activities list
+            loadActivities();
+          }
+        } catch (error) {
+          showActivityMessage("Error adding activity: " + error.message, false);
+        }
+      }
+
+      async function loadActivities() {
+        try {
+          const response = await fetch("/teacher/activities");
+          if (!response.ok) throw new Error("Unable to load activities.");
+          const data = await response.json();
+          const tbody = document.getElementById("activities-body");
+          
+          if (!data.activities || data.activities.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="3" style="text-align:center; padding:24px;">No activities added yet.</td></tr>';
+            return;
+          }
+          
+          tbody.innerHTML = data.activities
+            .map(
+              (activity) =>
+                `<tr><td>${activity.name}</td><td>${activity.date}</td><td><span class="status-pill present">Planned</span></td></tr>`,
+            )
+            .join("");
+        } catch (error) {
+          console.log("Could not load activities (endpoint may not be implemented yet)");
+        }
+      }
+
+      async function handleSendParentMessage() {
+        const parentName = document.getElementById("parent-name").value.trim();
+        const messageText = document.getElementById("parent-message").value.trim();
+        
+        if (!parentName || !messageText) {
+          showParentMessage("Parent name and message are required.", false);
+          return;
+        }
+
+        try {
+          const response = await fetch("/teacher/send_parent_message", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              parent_name: parentName,
+              message: messageText
+            })
+          });
+
+          const result = await response.json();
+          showParentMessage(result.message, result.success);
+          
+          if (result.success) {
+            document.getElementById("parent-message-form").reset();
+          }
+        } catch (error) {
+          showParentMessage("Error sending message: " + error.message, false);
+        }
+      }
+
+      async function loadParentContacts() {
+        try {
+          const response = await fetch("/teacher/parent_contacts");
+          if (!response.ok) throw new Error("Unable to load parent contacts.");
+          const data = await response.json();
+          const tbody = document.getElementById("parent-contacts-body");
+          
+          if (!data.contacts || data.contacts.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="3" style="text-align:center; padding:24px;">No parent contacts available yet.</td></tr>';
+            return;
+          }
+          
+          tbody.innerHTML = data.contacts
+            .map(
+              (contact) =>
+                `<tr><td>${contact.student_name}</td><td>${contact.parent_name}</td><td>${contact.phone}</td></tr>`,
+            )
+            .join("");
+        } catch (error) {
+          console.log("Could not load parent contacts (endpoint may not be implemented yet)");
+        }
+      }
+
+      // Set today's date as default in attendance date picker
+      window.addEventListener("DOMContentLoaded", function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("attendance-date").value = today;
+        loadStudentRoster();
+        loadActivities();
+        loadParentContacts();
+      });
     </script>
     <footer class="footer_section">
         <p>© 2026 Vickayor Private School. All rights reserved.</p>

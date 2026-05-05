@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admissions at Vickayor Private School - Application Process, Requirements, Fees">
+    <title>Admissions | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav_section">
+        <div class="left_section">
+            <a href="/">Home</a>
+            <a href="/about">About Us</a>
+            <a href="/academics">Academics</a>
+            <a href="/admissions">Admissions</a>
+        </div>
+        <div class="info">
+            <div class="brand">
+                <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo" class="brand-logo">
+                <div>
+                    <h1>Vickayor</h1>
+                </div>
+            </div>
+        </div>
+        <div class="right_section">
+            <a href="/contact">Contact</a>
+            <a href="https://wa.me/2347065950300" target="_blank">💬 Chat</a>
+            <a href="/login">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-content">
+        <!-- Hero -->
+        <section class="page-header">
+            <h1>Admissions</h1>
+            <p>Join Vickayor Private School. A simple, transparent admissions process for families.</p>
+        </section>
+
+        <!-- Call-to-Action -->
+        <section class="admissions-intro">
+            <h2>Ready to Apply?</h2>
+            <p>Joining Vickayor is easy. Follow our straightforward process below, or contact our admissions team for guidance.</p>
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="document.querySelector('#application').scrollIntoView({behavior: 'smooth'})">Start Application</button>
+                <a href="https://wa.me/2347065950300?text=Hi%20Vickayor%2C%20I%20would%20like%20information%20about%20admissions" class="btn btn-secondary" target="_blank">Chat on WhatsApp</a>
+                <a href="/contact" class="btn btn-secondary">Contact Admissions</a>
+            </div>
+        </section>
+
+        <!-- Admissions Process -->
+        <section class="admissions-process">
+            <h2>The Admissions Process</h2>
+            <div class="process-timeline">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <h3>Enquire & Schedule Visit</h3>
+                    <p>Contact us or book a campus visit. Meet our team and explore facilities.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <h3>Submit Application</h3>
+                    <p>Complete the application form with required documents and child's information.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <h3>Assessment</h3>
+                    <p>Child takes placement test to determine appropriate class level. Interview with parents.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <h3>Admission Letter</h3>
+                    <p>Receive admission decision and enrollment instructions.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">5</div>
+                    <h3>Registration & Orientation</h3>
+                    <p>Complete registration, pay fees, and attend orientation program.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">6</div>
+                    <h3>Welcome to Vickayor!</h3>
+                    <p>Student begins classes and integrates into the school community.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Application Form -->
+        <section id="application" class="application-section">
+            <h2>Online Application Form</h2>
+            <form class="admission-form" onsubmit="submitAdmissionForm(event)">
+                <h3>Parent/Guardian Information</h3>
+                <input type="text" placeholder="Full Name *" required>
+                <input type="email" placeholder="Email Address *" required>
+                <input type="tel" placeholder="Phone Number *" required>
+                <input type="text" placeholder="Occupation">
+
+                <h3>Child's Information</h3>
+                <input type="text" placeholder="Child's Full Name *" required>
+                <input type="date" placeholder="Date of Birth *" required>
+                <select required>
+                    <option value="">Select Class Level *</option>
+                    <option value="nursery">Nursery</option>
+                    <option value="primary1">Primary 1</option>
+                    <option value="primary2">Primary 2</option>
+                    <option value="primary3">Primary 3</option>
+                    <option value="primary4">Primary 4</option>
+                    <option value="primary5">Primary 5</option>
+                    <option value="primary6">Primary 6</option>
+                    <option value="jss1">JSS 1</option>
+                    <option value="jss2">JSS 2</option>
+                    <option value="jss3">JSS 3</option>
+                    <option value="ss1">SS 1</option>
+                    <option value="ss2">SS 2</option>
+                    <option value="ss3">SS 3</option>
+                </select>
+
+                <h3>Additional Information</h3>
+                <textarea placeholder="Why are you interested in Vickayor?" rows="4"></textarea>
+                <label class="checkbox">
+                    <input type="checkbox" required>
+                    I agree to the terms and conditions
+                </label>
+
+                <button type="submit" class="btn btn-primary-large">Submit Application</button>
+                <p class="form-note">You will receive a confirmation email with next steps.</p>
+            </form>
+        </section>
+
+        <!-- Requirements -->
+        <section class="requirements-section">
+            <h2>Application Requirements</h2>
+            <div class="requirements-grid">
+                <div class="req-card">
+                    <h3>For New Admissions</h3>
+                    <ul>
+                        <li>✓ Completed application form</li>
+                        <li>✓ Child's birth certificate copy</li>
+                        <li>✓ Recent passport photo</li>
+                        <li>✓ Report card (if applicable)</li>
+                        <li>✓ Health/vaccination record</li>
+                    </ul>
+                </div>
+                <div class="req-card">
+                    <h3>For Transfers</h3>
+                    <ul>
+                        <li>✓ Previous school credentials</li>
+                        <li>✓ Transfer certificate</li>
+                        <li>✓ Recent academic records</li>
+                        <li>✓ Character reference</li>
+                        <li>✓ Health documentation</li>
+                    </ul>
+                </div>
+                <div class="req-card">
+                    <h3>Assessment</h3>
+                    <ul>
+                        <li>✓ Placement test (English & Math)</li>
+                        <li>✓ Reasoning/psychometric test</li>
+                        <li>✓ Parent interview</li>
+                        <li>✓ Child discussion</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tuition & Fees -->
+        <section class="fees-section">
+            <h2>Tuition & Fees (2025/2026)</h2>
+            <p><strong>Note:</strong> Fees vary by class level. Contact admissions for detailed breakdown.</p>
+            <div class="fees-table">
+                <div class="fee-row">
+                    <div class="fee-item">Nursery</div>
+                    <div class="fee-price">Contact for details</div>
+                </div>
+                <div class="fee-row">
+                    <div class="fee-item">Primary</div>
+                    <div class="fee-price">Contact for details</div>
+                </div>
+                <div class="fee-row">
+                    <div class="fee-item">Secondary</div>
+                    <div class="fee-price">Contact for details</div>
+                </div>
+            </div>
+            <p class="fee-note">Payment plans available. Sibling discounts offered. Registration fees non-refundable.</p>
+        </section>
+
+        <!-- Policies -->
+        <section class="policies-section">
+            <h2>School Policies</h2>
+            <div class="policy-cards">
+                <div class="policy-card">
+                    <h3>Attendance Policy</h3>
+                    <p>Regular attendance is required. Absences must be reported to the school. Excessive absences may affect academic standing.</p>
+                </div>
+                <div class="policy-card">
+                    <h3>Discipline Policy</h3>
+                    <p>Students are expected to maintain high behavioral standards. Clear rules ensure a safe, respectful learning environment.</p>
+                </div>
+                <div class="policy-card">
+                    <h3>Academic Standards</h3>
+                    <p>Students must maintain satisfactory academic progress. Tutoring support available for students needing extra help.</p>
+                </div>
+                <div class="policy-card">
+                    <h3>Health & Safety</h3>
+                    <p>We maintain strict health and safety standards. First aid services available. Insurance recommended.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Admissions -->
+        <section class="contact-admissions">
+            <h2>Contact Our Admissions Team</h2>
+            <div class="contact-methods">
+                <div class="contact-box">
+                    <h3>📞 Call Us</h3>
+                    <a href="tel:+2347065950300">+234 706 595 0300</a>
+                </div>
+                <div class="contact-box">
+                    <h3>📧 Email</h3>
+                    <a href="mailto:admissions@vickayorprivateschool.com">admissions@vickayorprivateschool.com</a>
+                </div>
+                <div class="contact-box">
+                    <h3>💬 WhatsApp</h3>
+                    <a href="https://wa.me/2347065950300" target="_blank">Message on WhatsApp</a>
+                </div>
+                <div class="contact-box">
+                    <h3>🏫 Visit Us</h3>
+                    <p>38H, Olokun Quarters, Fajuyi Road, Ile-Ife</p>
+                    <p>Monday-Friday: 8:00 AM - 4:00 PM</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <h2>Next Steps</h2>
+            <p>Don't wait. Take the first step towards your child's bright future at Vickayor.</p>
+            <button class="btn btn-primary-large" onclick="document.querySelector('#application').scrollIntoView({behavior: 'smooth'})">Apply Now</button>
+        </section>
+    </main>
+
+    <footer class="footer_section">
+        <p>&copy; 2026 Vickayor Private School. All rights reserved.</p>
+    </footer>
+
+    <script>
+        async function submitAdmissionForm(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/admission/apply', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    alert('Application submitted successfully! Check your email for confirmation and next steps.');
+                    form.reset();
+                } else {
+                    alert('Please try again or contact admissions directly.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Unable to submit application. Please try again or email: admissions@vickayorprivateschool.com');
+            }
+        }
+    </script>
+</body>
+</html>

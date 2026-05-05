@@ -510,6 +510,7 @@ function addStudent(data) {
   const name = (data.name || "").trim();
   const email = (data.email || "").trim().toLowerCase();
   const studentId = (data.studentId || "").trim();
+  const classId = (data.classId || "").trim() || "default";
   if (!name || !email) {
     return {
       success: false,
@@ -538,6 +539,7 @@ function addStudent(data) {
     verified: true,
     status: "approved",
     studentId,
+    classId,
   });
 
   if (!saveUsersFile({ users })) {
@@ -810,9 +812,12 @@ const server = http.createServer((request, response) => {
       const headers = { "Content-Type": "application/json" };
       if (result.success) {
         const sessionId = generateSessionId();
+        const user = result.user;
         sessions[sessionId] = {
+          userId: user.id || user.email,
           email: data.email.trim().toLowerCase(),
           role: "teacher",
+          classId: user.classId || "default",
           expires: Date.now() + 3600 * 1000,
         };
         headers["Set-Cookie"] =
@@ -954,8 +959,14 @@ const server = http.createServer((request, response) => {
       return;
     }
     const usersFile = readUsersFile();
+    const teacherClassId = session.classId || "default";
     const students = (usersFile.users || [])
-      .filter((u) => u.role === "student")
+      .filter(
+        (u) =>
+          u.role === "student" &&
+          (u.classId === teacherClassId ||
+            (u.classId === "default" && teacherClassId === "default")),
+      )
       .map(({ name, email, studentId, status }) => ({
         name,
         email,
@@ -977,6 +988,7 @@ const server = http.createServer((request, response) => {
     }
     parseBody(request, (data) => {
       try {
+        data.classId = session.classId || "default";
         const result = addStudent(data);
         response.writeHead(result.success ? 200 : 400, {
           "Content-Type": "application/json",
@@ -1022,6 +1034,276 @@ const server = http.createServer((request, response) => {
         );
       }
     });
+    return;
+  }
+
+  // teacher — save attendance
+  if (request.method === "POST" && pathname === "/teacher/save_attendance") {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(
+        JSON.stringify({ success: false, message: "Access denied" }),
+      );
+      return;
+    }
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+    request.on("end", () => {
+      try {
+        const data = JSON.parse(body);
+        // Load or initialize attendance records file
+        let attendanceFile = {};
+        try {
+          const content = fs.readFileSync(
+            path.join(__dirname, "attendance.json"),
+            "utf8",
+          );
+          attendanceFile = JSON.parse(content);
+        } catch (e) {
+          attendanceFile = { records: [] };
+        }
+
+        if (!attendanceFile.records) {
+          attendanceFile.records = [];
+        }
+
+        // Add new attendance records
+        const { date, records } = data;
+        if (records && Array.isArray(records)) {
+          records.forEach((record) => {
+            attendanceFile.records.push({
+              ...record,
+              saved_at: new Date().toISOString(),
+            });
+          });
+        }
+
+        // Save to file
+        fs.writeFileSync(
+          path.join(__dirname, "attendance.json"),
+          JSON.stringify(attendanceFile, null, 2),
+        );
+
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: true,
+            message: `Attendance for ${date} saved successfully!`,
+          }),
+        );
+      } catch (error) {
+        console.error("Failed to save attendance:", error);
+        response.writeHead(500, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: false,
+            message: "Server error while saving attendance.",
+          }),
+        );
+      }
+    });
+    return;
+  }
+
+  // teacher — add activity
+  if (request.method === "POST" && pathname === "/teacher/add_activity") {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(
+        JSON.stringify({ success: false, message: "Access denied" }),
+      );
+      return;
+    }
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+    request.on("end", () => {
+      try {
+        const data = JSON.parse(body);
+        // Load or initialize activities file
+        let activitiesFile = {};
+        try {
+          const content = fs.readFileSync(
+            path.join(__dirname, "activities.json"),
+            "utf8",
+          );
+          activitiesFile = JSON.parse(content);
+        } catch (e) {
+          activitiesFile = { activities: [] };
+        }
+
+        if (!activitiesFile.activities) {
+          activitiesFile.activities = [];
+        }
+
+        // Add new activity
+        activitiesFile.activities.push({
+          id: Date.now(),
+          name: data.name,
+          date: data.date,
+          created_at: new Date().toISOString(),
+          teacher_id: session.userId,
+        });
+
+        // Save to file
+        fs.writeFileSync(
+          path.join(__dirname, "activities.json"),
+          JSON.stringify(activitiesFile, null, 2),
+        );
+
+        response.writeHead(201, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: true,
+            message: "Activity added successfully!",
+          }),
+        );
+      } catch (error) {
+        console.error("Failed to add activity:", error);
+        response.writeHead(500, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: false,
+            message: "Server error while adding activity.",
+          }),
+        );
+      }
+    });
+    return;
+  }
+
+  // teacher — get activities
+  if (request.method === "GET" && pathname === "/teacher/activities") {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ activities: [] }));
+      return;
+    }
+    try {
+      let activitiesFile = { activities: [] };
+      try {
+        const content = fs.readFileSync(
+          path.join(__dirname, "activities.json"),
+          "utf8",
+        );
+        activitiesFile = JSON.parse(content);
+      } catch (e) {
+        // File doesn't exist yet, return empty list
+      }
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(
+        JSON.stringify({ activities: activitiesFile.activities || [] }),
+      );
+    } catch (error) {
+      response.writeHead(500, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ activities: [] }));
+    }
+    return;
+  }
+
+  // teacher — send parent message
+  if (
+    request.method === "POST" &&
+    pathname === "/teacher/send_parent_message"
+  ) {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(
+        JSON.stringify({ success: false, message: "Access denied" }),
+      );
+      return;
+    }
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+    request.on("end", () => {
+      try {
+        const data = JSON.parse(body);
+        // Load or initialize messages file
+        let messagesFile = {};
+        try {
+          const content = fs.readFileSync(
+            path.join(__dirname, "parent_messages.json"),
+            "utf8",
+          );
+          messagesFile = JSON.parse(content);
+        } catch (e) {
+          messagesFile = { messages: [] };
+        }
+
+        if (!messagesFile.messages) {
+          messagesFile.messages = [];
+        }
+
+        // Add new message
+        messagesFile.messages.push({
+          id: Date.now(),
+          parent_name: data.parent_name,
+          message: data.message,
+          teacher_name: session.name,
+          sent_at: new Date().toISOString(),
+        });
+
+        // Save to file
+        fs.writeFileSync(
+          path.join(__dirname, "parent_messages.json"),
+          JSON.stringify(messagesFile, null, 2),
+        );
+
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: true,
+            message: "Message sent to parent successfully!",
+          }),
+        );
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        response.writeHead(500, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            success: false,
+            message: "Server error while sending message.",
+          }),
+        );
+      }
+    });
+    return;
+  }
+
+  // teacher — get parent contacts
+  if (request.method === "GET" && pathname === "/teacher/parent_contacts") {
+    const session = getSession(request);
+    if (!session || session.role !== "teacher") {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ contacts: [] }));
+      return;
+    }
+    try {
+      const usersFile = readUsersFile();
+      // Get all students for parent contact info
+      const contacts = (usersFile.users || [])
+        .filter((u) => u.role === "student")
+        .map((student) => ({
+          student_name: student.name,
+          parent_name: student.parent_name || "Not provided",
+          phone: student.parent_phone || "Not provided",
+        }));
+
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ contacts }));
+    } catch (error) {
+      response.writeHead(500, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ contacts: [] }));
+    }
     return;
   }
 

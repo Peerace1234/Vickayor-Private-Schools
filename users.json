@@ -32,7 +32,8 @@
       "verified": true,
       "status": "approved",
       "subject": "Data Processing",
-      "phone": "+2347034579933"
+      "phone": "+2347034579933",
+      "classId": "default"
     },
     {
       "name": "Toheeb",
@@ -41,15 +42,6 @@
       "role": "student",
       "verified": true,
       "status": "approved"
-    },
-    {
-      "name": "Victor",
-      "email": "victorapobi21@gmail.com",
-      "password": "a7a7d107d71b2f4e4537c2e061a53200:55bec473e4fff50489058f634a2e212043d42c2385f37fcf1690fafd9ed8b3ff0a974374a49ae95b7cdf9b9a82c36b72bb8d7f9ec8a2da39358498427b7babfd",
-      "role": "student",
-      "verified": true,
-      "status": "approved",
-      "studentId": "202604"
     },
     {
       "name": "Victor",

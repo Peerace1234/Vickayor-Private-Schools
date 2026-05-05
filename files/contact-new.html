@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Vickayor Private School - Admissions, Inquiries, and Support">
+    <title>Contact Us | Vickayor Private School</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav_section">
+        <div class="left_section">
+            <a href="/">Home</a>
+            <a href="/about">About Us</a>
+            <a href="/academics">Academics</a>
+            <a href="/admissions">Admissions</a>
+        </div>
+        <div class="info">
+            <div class="brand">
+                <img src="../Vickayor LOGO.jpg" alt="Vickayor Logo" class="brand-logo">
+                <div>
+                    <h1>Vickayor</h1>
+                </div>
+            </div>
+        </div>
+        <div class="right_section">
+            <a href="/contact">Contact</a>
+            <a href="https://wa.me/2347065950300" target="_blank">💬 Chat</a>
+            <a href="/login">Login</a>
+        </div>
+    </nav>
+
+    <main class="page-content">
+        <!-- Hero -->
+        <section class="page-header">
+            <h1>Get in Touch</h1>
+            <p>Have questions? We're here to help. Reach out via your preferred method.</p>
+        </section>
+
+        <!-- Quick Contact Methods -->
+        <section class="quick-contact">
+            <h2>Quick Contact Options</h2>
+            <div class="contact-methods">
+                <a href="https://wa.me/2347065950300?text=Hello%20Vickayor%2C%20I%20would%20like%20to%20know%20more%20about%20your%20school" 
+                   class="contact-method whatsapp" target="_blank">
+                    <div class="method-icon">💬</div>
+                    <h3>WhatsApp</h3>
+                    <p>Instant messaging</p>
+                    <span>+234 706 595 0300</span>
+                </a>
+                <a href="tel:+2347065950300" class="contact-method phone">
+                    <div class="method-icon">📞</div>
+                    <h3>Call Us</h3>
+                    <p>Speak to our team</p>
+                    <span>+234 706 595 0300</span>
+                </a>
+                <a href="mailto:vickayorprivateschool@gmail.com" class="contact-method email">
+                    <div class="method-icon">📧</div>
+                    <h3>Email</h3>
+                    <p>Send us a message</p>
+                    <span>vickayorprivateschool@gmail.com</span>
+                </a>
+                <a href="/admissions" class="contact-method admissions">
+                    <div class="method-icon">🎓</div>
+                    <h3>Admissions</h3>
+                    <p>Apply online</p>
+                    <span>Start Your Application</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Contact Form -->
+        <section class="contact-form-section">
+            <div class="form-container">
+                <h2>Send Us a Message</h2>
+                <p>Fill out the form below and we'll get back to you within 24 hours.</p>
+                
+                <form id="contact-form" onsubmit="submitContactForm(event)">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" placeholder="Your full name" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+234 ...">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="enquiry-type">Enquiry Type *</label>
+                        <select id="enquiry-type" name="enquiry_type" required>
+                            <option value="">Select enquiry type</option>
+                            <option value="admission">Admission Inquiry</option>
+                            <option value="visit">Campus Visit Request</option>
+                            <option value="fees">Fees & Payment</option>
+                            <option value="academics">Academic Programs</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject *</label>
+                        <input type="text" id="subject" name="subject" placeholder="What is this about?" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" rows="6" placeholder="Tell us more..." required></textarea>
+                    </div>
+
+                    <!-- Optional: If student/child info -->
+                    <details class="optional-section">
+                        <summary>Child's Information (Optional)</summary>
+                        <div class="form-group">
+                            <input type="text" name="child_name" placeholder="Child's name">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="child_class" placeholder="Desired class level">
+                        </div>
+                    </details>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                        <div id="form-status" class="form-status"></div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Contact Info Sidebar -->
+            <div class="contact-info-sidebar">
+                <h3>Contact Information</h3>
+                
+                <div class="info-item">
+                    <h4>📍 Address</h4>
+                    <p>38H, Olokun Quarters<br>Fajuyi Road, Ile-Ife<br>Nigeria</p>
+                </div>
+
+                <div class="info-item">
+                    <h4>📞 Phone</h4>
+                    <a href="tel:+2347065950300">+234 706 595 0300</a>
+                </div>
+
+                <div class="info-item">
+                    <h4>📧 Email</h4>
+                    <a href="mailto:vickayorprivateschool@gmail.com">vickayorprivateschool@gmail.com</a>
+                </div>
+
+                <div class="info-item">
+                    <h4>⏰ Office Hours</h4>
+                    <p>Monday - Friday<br>8:00 AM - 4:00 PM<br>Nigerian Time (WAT)</p>
+                </div>
+
+                <div class="info-item">
+                    <h4>💬 WhatsApp Business</h4>
+                    <a href="https://wa.me/2347065950300" target="_blank">
+                        Chat on WhatsApp
+                    </a>
+                    <p style="font-size: 0.85em; margin-top: 5px; color: #666;">Available 8 AM - 6 PM</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-items">
+                <details class="faq-item">
+                    <summary><strong>How do I apply for admission?</strong></summary>
+                    <p>Visit our <a href="/admissions">Admissions page</a> to start your application online or contact our admissions team for guidance.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary><strong>What is the expected response time?</strong></summary>
+                    <p>We typically respond to all enquiries within 24 business hours. For urgent matters, please call us directly.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary><strong>Can I schedule a campus visit?</strong></summary>
+                    <p>Yes! Please select "Campus Visit Request" in the enquiry form, or message us on WhatsApp to arrange a convenient time.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary><strong>How can I get information about school fees?</strong></summary>
+                    <p>Contact our admissions team for a detailed fee breakdown. Fees vary by class level and are available upon request.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary><strong>Is there a payment plan available?</strong></summary>
+                    <p>Yes, we offer flexible payment plans. Contact the school office or admissions team for options.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary><strong>What documents do I need for admission?</strong></summary>
+                    <p>See our <a href="/admissions">Admissions page</a> for a complete list of required documents.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- Map Section (if you want to embed) -->
+        <section class="map-section">
+            <h2>Find Us</h2>
+            <div style="background: #e8e8e8; height: 400px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-top: 20px;">
+                <p style="text-align: center; color: #666;">
+                    📍 38H, Olokun Quarters, Fajuyi Road, Ile-Ife<br>
+                    <small>Map integration coming soon</small>
+                </p>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <h2>Ready to Join Vickayor?</h2>
+            <p>Whether you have questions or are ready to apply, we're here to help.</p>
+            <div class="cta-buttons">
+                <a href="/admissions" class="btn btn-primary">Apply Now</a>
+                <a href="https://wa.me/2347065950300" target="_blank" class="btn btn-secondary">Chat on WhatsApp</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer_section">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/academics">Academics</a></li>
+                    <li><a href="/admissions">Admissions</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p>📞 +234 706 595 0300</p>
+                <p>📧 vickayorprivateschool@gmail.com</p>
+                <p>📍 38H, Olokun Quarters, Fajuyi Road, Ile-Ife</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Vickayor Private School. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        async function submitContactForm(event) {
+            event.preventDefault();
+            const statusDiv = document.getElementById('form-status');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value || null,
+                    enquiry_type: document.getElementById('enquiry-type').value,
+                    subject: document.getElementById('subject').value,
+                    message: document.getElementById('message').value,
+                    child_name: document.getElementById('contact-form').querySelector('[name="child_name"]').value || null,
+                    child_class: document.getElementById('contact-form').querySelector('[name="child_class"]').value || null,
+                };
+
+                const response = await fetch('/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    statusDiv.innerHTML = '✅ <strong>Message sent successfully!</strong><br>We\'ll get back to you within 24 hours.';
+                    statusDiv.className = 'form-status success';
+                    event.target.reset();
+                    
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        statusDiv.innerHTML = '';
+                    }, 5000);
+                } else {
+                    statusDiv.innerHTML = '❌ <strong>Error sending message.</strong><br>Please try again or call us directly.';
+                    statusDiv.className = 'form-status error';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.innerHTML = '❌ <strong>Unable to send message.</strong><br>Please call us at +234 706 595 0300 or try WhatsApp.';
+                statusDiv.className = 'form-status error';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+            }
+        }
+    </script>
+</body>
+</html>
